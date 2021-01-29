@@ -2,7 +2,11 @@
 session_start();
   include 'function.php';
   if (isset($_GET['page']) && !empty($_GET['page'])) { //si exite page y no esta vacia
-    $clase = $_GET['page'];
+    if (isset($_SESSION['user'])) {
+      $clase = $_GET['page'];
+    } else {
+      $clase = "user";
+    }
   } else if(!isset($_GET['page'])) { //si no existe page y esta vacia
     if (isset($_SESSION['user'])) {
       $clase = "dashboard";
