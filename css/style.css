@@ -1,0 +1,180 @@
+/* Al poner box-sizing con la pripiedad border-box, le indicamos que
+con la altura y ancho que le especifiquemos no se agrande dependiendo
+del borde y padding que le agreguemos.
+Por default tiene content box y con eso si especificamos un height o ancho
+a un elemento y tambien agregamos relleno y borde, entonces el elemento
+crecera mas de lo que le especificamos.
+Por eso en ocasiones es mejor el valor de border-box para la propiedad */
+* {box-sizing: border-box;margin:0; padding: 0;}
+body{/*este es el fondo si no es admin: background-color: #f5f5f5;*/background-color: #32424a; font-size: 12pt;font-family: sans-serif;position:relative;}/* cambia la fuente */
+
+/* NAVBAR */
+header{background-color: #4586ff;}
+header nav{
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    justify-content: space-between;
+    align-items: center;
+    height: 60px;
+    width: 70%;
+    margin: 0 auto;
+    padding: 0 50px;
+}
+header nav div ul{list-style-type: none;}
+header nav div h2 {color: #fff;} /* Este se va a eliminar cuando cambies a foto el logo */
+header nav div ul li a {text-decoration: none; color: #fff;}
+
+/* CONTENIDO PRINCIPAL */
+main{
+    width: 70%;
+    margin: 0 auto;
+    display: flex;
+    justify-content: center;
+    /* align-items: center; */
+    /* background-color: red; */
+}
+
+/* FOOTER */
+footer{
+    background-color: #32424a;
+    position: fixed;
+    width: 100%;
+    height: 40px;
+    bottom: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+footer p {color:#fff;}
+
+/* LOGIN */
+main article {width: 40%;}
+main article form {
+    background-color: #fff;
+    padding: 50px 30px;
+    margin: 80px auto 0 auto;
+    width: 70%;
+    -webkit-animation: show_form 1s ease-in;
+	animation: show_form 1s ease-in;
+  -webkit-transition: all 1.1s 0.4s ease-in;
+		transition: all 0.4s 0.4s ease-in;
+}
+@keyframes show_form {
+    0% {margin-top: 50px;}
+    100% {margin-top: 80px;}
+}
+@-webkit-keyframes show_form {
+    0% {margin-top: 50px;}
+    100% {margin-top: 80px;}
+}
+main article form.hide{
+    -webkit-animation: hide_form 1s ease-out;
+	animation: hide_form 1s ease-out;
+  -webkit-transition: all 1.1s 0.4s ease-out;
+		transition: all 1.1s 0.4s ease-out;
+}
+@keyframes hide_form {
+    0% {opacity: 1;}
+    100% {opacity: 0;}
+}
+@-webkit-keyframes hide_form {
+    0% {opacity: 0;}
+    100% {opacity: 1;}
+}
+main article form #img-logo {
+    background-color: #01ecd5;
+    height: 100px;
+    text-align: center;
+    border-radius: 100%;
+    width: 100px;
+    margin: 0 auto 30px auto;
+    /* background-image: url(https://upload.wikimedia.org/wikipedia/commons/thumb/5/57/Code.svg/1200px-Code.svg.png); */
+}
+main article form #img-logo img {height: 100%;width: 100%;}
+main article form .input-icon {
+    display: flex;
+    align-items: center;
+    height: 45px;
+    margin: 5px 0 20px 0;
+    background-color: #f0f0f0;
+    border-radius: 3px;
+}
+main article form .input-icon #user-icon,
+main article form .input-icon #unlock-icon {
+    display: block;
+    width: 15%;
+    /* border: 2px solid #e4e4e4; */
+    height: 100%;
+    padding: 14px 0;
+    /* background-color: #fff; */
+    /* color: #1961e6; */
+    color: #32424a;
+}
+main article form input {
+    display: block;
+    width: 100%;
+    height: 100%;
+    padding: 5px 15px;
+    border: 2px solid transparent;
+    background-color: #f0f0f0;
+    border-radius: 3px;
+}
+main article form input:focus {
+    /* outline-color: hsl(219 100% 70% / 1); */
+    outline-color: #e4e4e4;
+    outline-style: none;
+    border: 2px solid transparent;
+}
+main article form button#btn-login {
+    background-color: #4586ff;
+    border: none;
+    padding: 10px 30px;
+    color: #ffffff;
+    font-size: 1rem;
+    margin: 30px 0 0 0;
+    width: 100%;
+    display: block;
+    transition: all .2s;
+}
+main article form button#btn-login:hover{
+    cursor: pointer;
+    background-color: #528eff;
+}
+main article form button#btn-login:focus{
+    background-color:#337aff;
+    outline: none;
+}
+
+/* NOTIFICATIONS */
+body #formulario_ingreso #notification_fail {
+    height: auto;
+    /* position: absolute; */
+    width: 100%;
+    border-radius: 4px;
+    display: none;
+    background-color: #f7d4d4;
+    border: 1px solid #efa9a9;
+    color: #db3d3d;
+    text-align: center;
+    padding: 10px 5px;
+}
+main article #redirecting{
+    /* background-color: red; */
+    text-align: center;
+    padding: 20px;
+    position: relative;
+    top: 100%;
+    display: none;
+}
+main article #redirecting p{
+    font-size: 1.8rem;
+    color:white;
+    margin-bottom: 50px;
+
+}
+
+/* -------------------- INDEX -------------------- */
+#main #profile {
+    
+}
