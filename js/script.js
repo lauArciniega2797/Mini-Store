@@ -23,7 +23,7 @@ $('#btn-login').on('click', function(e) {
                     document.getElementById('formulario_ingreso').style.display = 'none'
                     setTimeout(
                         function(){
-                            location.href = "http://localhost/Practica_Lau/?page=dashboard&action=";
+                            location.href = "http://localhost/Mini-Store/?page=dashboard&action=";
                         }, 4000
                     );
                 } else {
