@@ -6,10 +6,11 @@ a un elemento y tambien agregamos relleno y borde, entonces el elemento
 crecera mas de lo que le especificamos.
 Por eso en ocasiones es mejor el valor de border-box para la propiedad */
 * {box-sizing: border-box;margin:0; padding: 0;}
-body{/*este es el fondo si no es admin: background-color: #f5f5f5;*/background-color: #32424a; font-size: 12pt;font-family: sans-serif;position:relative;}/* cambia la fuente */
+body{font-size: 12pt;font-family: sans-serif;position:relative;}/* cambia la fuente */
+body#login{/*este es el fondo si no es admin: background-color: #f5f5f5;*/background-color: #32424a; font-size: 12pt;font-family: sans-serif;position:relative;}/* cambia la fuente */
 
 /* NAVBAR */
-header{background-color: #4586ff;}
+header{background-color: #8675a9;}
 header nav{
     display: flex;
     flex-direction: row;
@@ -21,6 +22,18 @@ header nav{
     margin: 0 auto;
     padding: 0 50px;
 }
+header nav div ul {
+    display: flex;
+    justify-content: space-between;
+    list-style-type: none;
+}
+header nav div ul li a {
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    padding: 5px 20px;
+}
+header nav div ul li
 header nav div ul{list-style-type: none;}
 header nav div h2 {color: #fff;} /* Este se va a eliminar cuando cambies a foto el logo */
 header nav div ul li a {text-decoration: none; color: #fff;}
@@ -145,7 +158,6 @@ main article form button#btn-login:focus{
     background-color:#337aff;
     outline: none;
 }
-
 /* NOTIFICATIONS */
 body #formulario_ingreso #notification_fail {
     height: auto;
@@ -174,7 +186,31 @@ main article #redirecting p{
 
 }
 
-/* -------------------- INDEX -------------------- */
+/* -------------------- DASHBOARD -------------------- */
+#main {
+    margin:0 auto;
+    width: 70%;
+}
+#main article {
+    padding: 50px 0;
+}
 #main #profile {
-    
+    padding: 50px 0;
+    display: flex;
+    align-items: center;
+}
+#main #profile img,
+#main #profile h1 {
+    display: inline-block;
+}
+#main #profile img {
+    width: 100px;
+}
+#main #profile h1{
+    font-size: 2.2rem;
+    /* padding: 5px 0; */
+    margin-left: 20px;
+}
+#main #products h2 {
+    text-align: center;
 }

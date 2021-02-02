@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/all.css">
 </head>
-<body>
+<body id="login">
     <main id="main-login">
         <article>
             <form id="formulario_ingreso">

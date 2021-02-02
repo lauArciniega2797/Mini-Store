@@ -36,10 +36,10 @@ class user{
 }
 
 class dashboard {
-    function index(){
-        return 'view/dashboard.php';
+    public function index(){
+        require_once 'view/dashboard.php';
     }
-    function getProductsToFinish(){
+    public function getProductsToFinish(){
 
     }
 }

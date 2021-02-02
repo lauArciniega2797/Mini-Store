@@ -2,11 +2,7 @@
 session_start();
   include 'function.php';
   if (isset($_GET['page']) && !empty($_GET['page'])) { //si exite page y no esta vacia
-    if (isset($_SESSION['user'])) {
-      $clase = $_GET['page'];
-    } else {
-      $clase = "user";
-    }
+    $clase = $_GET['page'];
   } else if(!isset($_GET['page'])) { //si no existe page y esta vacia
     if (isset($_SESSION['user'])) {
       $clase = "dashboard";
@@ -18,12 +14,12 @@ session_start();
   }
 
   if (class_exists($clase)) { //si la clase anterior existe
-    $Objetcinstance = new $clase; //instanciamos la clase
+    $objectInstance = new $clase; //instanciamos la clase
     
     if (isset($_GET['action']) && !empty($_GET['action'])) {
-      if (method_exists($Objetcinstance, $_GET['action'])) {
+      if (method_exists($objectInstance, $_GET['action'])) {
         $action = $_GET['action'];
-        $Objetcinstance->$action();
+        $objectInstance->$action();
       } else{
         echo 'Esa no es una accion valida';
       }
@@ -33,7 +29,7 @@ session_start();
       } else {
         $action = "login"; //aqui va el login
       }
-      $Objetcinstance->$action();
+      $objectInstance->$action();
     } else {
       echo 'Esa acción no es valida';
     }
