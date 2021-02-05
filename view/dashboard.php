@@ -1,11 +1,6 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="css/style.css">
-    <title>Eunicodin</title>
-</head>
+<?php
+  require_once 'includes/header.php';
+?>
 <body>
   <header id="header">
     <nav>
@@ -158,5 +153,6 @@
       </div>
     </article>
   </section>
-</body>
-</html>
+<?php
+  require_once 'includes/footer.php';
+?>
