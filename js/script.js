@@ -43,27 +43,32 @@ $('#btn-login').on('click', function(e) {
 });
 /* ---------- INSERT PRODUCT ON DATABASE ----------  */
 $('#senData').on('click', function(e){
-    // console.log('Colores');
+    console.log('Colores');
     e.preventDefault();
     var empty = notEmpty();
+    console.log("🚀 ~ file: script.js ~ line 49 ~ $ ~ empty", empty)
     if (empty) {
+        let objData = {
+            name: $("#inputName").val(),
+            price: $("#inputPrice").val(),
+            procedence_store: $("#inputPStore").val(),
+            store_price: $('#inputSPrice').val(),
+            quantity: $('#inputQuantity').val(),
+            image: $('#file').files[0]
+        };
         var datos = new FormData();
-        datos.append('name',document.getElementById("inputName").value);
-        datos.append('price',document.getElementById("inputPrice").value);
-        datos.append('procedence_store',document.getElementById("inputPStore").value);
-        datos.append('store_price',document.getElementById("inputSPrice").value);
-        datos.append('quantity',document.getElementById("inputQuantity").value);
-        datos.append('image', document.getElementById('file').files[0]);
-    console.log(datos);
+        datos.append('data', objData);
+        console.log("🚀 ~ file: script.js ~ line 64 ~ $ ~ datos", datos)
 
     // EL FORMDATA CON AJAX ME REFRESCA LA PAGINA CUANDO GUARDO UN PRODUCTO Y CUANDO LLEVA UNA IMAGEN
         $.ajax({
             type:'POST',
-            data: {formData: datos},
+            data: datos,
             url:'index.php?page=products&action=saveProducts',
             contentType: false,
             processData: false,
-            success:function(response){
+            // success:function(response){
+            success: (response) => {
                 console.log(response);
                 // if (response.split('<section class="container">')[1].split('<!-- Si hay')[0].trim() == "correct") {
                 //     document.getElementById('successData').style.display = 'block';
@@ -78,6 +83,7 @@ $('#senData').on('click', function(e){
         });
         return false;
     } else {
+        // $('#ijiji')
         document.getElementById('failData').style.display = 'block';
         document.getElementById('failData').innerHTML = 'Datos Incompletos';
     }
