@@ -15,10 +15,10 @@
       <div><h2>EUNICODIN</h2></div>
       <div>
         <ul>
-          <li><a href="#dashboard">Inicio</a></li>
-          <li><a href="#productos">Productos</a></li>
-          <li><a href="#nuevo_producto">Nuevo Producto</a></li>
-          <li><a href="#contacto">Contacto</a></li>
+          <li><a href="?page=dashboard&action=">Inicio</a></li>
+          <li><a href="?page=products&action=">Productos</a></li>
+          <li><a href="?page=products&action=new">Nuevo Producto</a></li>
+          <li><a href="?page=dashboard&action=">Contacto</a></li>
         </ul>
       </div>
     </nav>
