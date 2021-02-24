@@ -38,16 +38,16 @@ class user{
 class dashboard {
     public function index(){
         $product = new products();
-        $productos = $product->getProducts();
+        $productos = $product->getProductsToFinish();
         require_once 'view/dashboard.php';
-    }
-    public function getProductsToFinish(){
-
     }
 } 
 
 class products{
     public function index(){
+        require_once 'view/new-product.php';
+    }
+    public function newProduct(){
         require_once 'view/new-product.php';
     }
     public function saveProducts(){
@@ -81,9 +81,10 @@ class products{
             $query = "INSERT INTO products VALUES(null,'$name',$price,'$image_name','$procedence_store',$store_price,$quantity,'$status')";
             include 'conexion.php'; //si la pongo por fuera, no funciona :(
             $query_prepare = $con->prepare($query);
-            $query_prepare->execute();
+            if($query_prepare->execute()){
+                echo 'done';
+            }
 
-            var_dump($query_prepare);
 
             // if ($query_prepare->execute()) {
             //     echo 'todo chido';
@@ -97,12 +98,16 @@ class products{
         include 'conexion.php';
         $query_prepare = $con->prepare($query);
         $query_prepare->execute();
-        // var_dump($query_prepare->execute());
-        if ($query_prepare->execute()) {
-            return $query_prepare;
-        } else {
-            return false;
-        }
+        $row = $query_prepare->fetchAll(PDO::FETCH_ASSOC);
+        return $row;
+    }
+    public function getProductsToFinish(){
+        $query = "SELECT * FROM products where status = 'warning' LIMIT 4";
+        include 'conexion.php';
+        $query_prepare = $con->prepare($query);
+        $query_prepare->execute();
+        $row = $query_prepare->fetchAll(PDO::FETCH_ASSOC);
+        return $row;
     }
 }
 ?>

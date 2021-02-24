@@ -56,7 +56,15 @@ $('#senData').on('click', function(e){
             processData: false,
             contentType: false,
             success:function(response){
-                console.log(response);
+                if (response == 'done') {
+                    $('#successData').html('Los datos se guardaron correctamente');
+                    $('#successData').css({'display':'block'});
+                }
+                setTimeout(() => {
+                    $('form#newProductForm')[0].reset();
+                    $('.box-image').css({'background-image':'none'})
+                    $('#successData').css({'display':'none'})
+                }, 4000);
             }
         });
     } else {
