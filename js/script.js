@@ -43,45 +43,22 @@ $('#btn-login').on('click', function(e) {
 });
 /* ---------- INSERT PRODUCT ON DATABASE ----------  */
 $('#senData').on('click', function(e){
-    console.log('Colores');
+    // console.log(document.getElementById('file').files[0]);
     e.preventDefault();
     var empty = notEmpty();
-    console.log("🚀 ~ file: script.js ~ line 49 ~ $ ~ empty", empty)
-    if (empty) {
-        let objData = {
-            name: $("#inputName").val(),
-            price: $("#inputPrice").val(),
-            procedence_store: $("#inputPStore").val(),
-            store_price: $('#inputSPrice').val(),
-            quantity: $('#inputQuantity').val(),
-            image: $('#file').files[0]
-        };
-        var datos = new FormData();
-        datos.append('data', objData);
-        console.log("🚀 ~ file: script.js ~ line 64 ~ $ ~ datos", datos)
 
-    // EL FORMDATA CON AJAX ME REFRESCA LA PAGINA CUANDO GUARDO UN PRODUCTO Y CUANDO LLEVA UNA IMAGEN
+    if (empty) {
+        var dataa = new FormData($('form#newProductForm')[0]);
         $.ajax({
-            type:'POST',
-            data: datos,
             url:'index.php?page=products&action=saveProducts',
-            contentType: false,
+            type:'POST',
+            data: dataa,
             processData: false,
-            // success:function(response){
-            success: (response) => {
+            contentType: false,
+            success:function(response){
                 console.log(response);
-                // if (response.split('<section class="container">')[1].split('<!-- Si hay')[0].trim() == "correct") {
-                //     document.getElementById('successData').style.display = 'block';
-                //     document.getElementById('successData').innerHTML = 'Los datos se han subido correctamente';
-                //     setTimeout(
-                //         function(){
-                //             location.href = "http://localhost/Ahlai/products/";
-                //         }, 3000
-                //     );
-                // }
             }
         });
-        return false;
     } else {
         // $('#ijiji')
         document.getElementById('failData').style.display = 'block';

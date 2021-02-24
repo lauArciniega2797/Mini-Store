@@ -58,7 +58,7 @@ require_once 'includes/header.php';
                             <!-- <label for="" id="error-message"></label> -->
                         </div>
                     </div>
-                    <a id="senData" class="btn btn-primary">Guardar</a>
+                    <a id="senData" href="javascript(void)" class="btn btn-primary">Guardar</a>
                 </div>
             </div>
         </form>

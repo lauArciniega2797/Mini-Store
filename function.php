@@ -37,6 +37,8 @@ class user{
 
 class dashboard {
     public function index(){
+        $product = new products();
+        $productos = $product->getProducts();
         require_once 'view/dashboard.php';
     }
     public function getProductsToFinish(){
@@ -49,60 +51,57 @@ class products{
         require_once 'view/new-product.php';
     }
     public function saveProducts(){
-        // var_dump($_POST);
         if($_POST){
-            // $datos = json_decode($_POST['data'], true);
-            // parse_str($_POST['data'], $datos);
-            var_dump($_POST);
-            // $price = $datos['price'];
-            // // var_dump(get_object_vars($datos));
-            // $name = $datos['name'];
-            // $procedence_store = $datos['procedence_store'];
-            // $store_price = $datos['store_price'];
-            // $quantity = $datos['quantity'];
-            // // $image = $_FILES[$datos['image']] != null ? $_FILES[$datos['image']] : false;
-            // $image = $datos['image'];
-            // var_dump($name);
-            // var_dump($price);
-            // var_dump($procedence_store);
-            // var_dump($store_price);
-            // var_dump($quantity);
-            // var_dump($image);
-            // // $name = $_POST['name'];
-            // // $price = $_POST['price'];
-            // // $procedence_store = $_POST['procedence_store'];
-            // // $store_price = $_POST['store_price'];
-            // // $quantity = $_POST['quantity'];
-            // // $image = isset($_FILES['image']) ? $_FILES['image'] : false;
+            $name = $_POST['name'];
+            $price = $_POST['price'];
+            $procedence_store = $_POST['procedence_store'];
+            $store_price = $_POST['store_price'];
+            $quantity = $_POST['quantity'];
+            $image = isset($_FILES['image']) ? $_FILES['image'] : false;
 
-            // $image_name = null;
-            // if ($image) {
-            //     $image_name = $image['name'];
-            //     if ($image_name != null) {
-            //         //almacenar la imagen en un directorio
-            //         $directory = $_SERVER['DOCUMENT_ROOT'].'/Mini-Store/images/';
-            //         move_uploaded_file($image['tmp_name'],$directory.$image_name);
-            //     }
-            // }
-            // $status = "";
-            // if ($quantity >= 2 && $quantity <= 5) {
-            //     $status = "warning";
-            // } else if($quantity >= 0 && $quantity <= 1){
-            //     $status = "empty";
-            // } else {
-            //     $status = "full";
-            // }
+            $image_name = null;
+            if ($image) {
+                $image_name = $image['name'];
+                if ($image_name != null) {
+                    //almacenar la imagen en un directorio
+                    $directory = 'images/';
+                    move_uploaded_file($image['tmp_name'],$directory.$image_name);
+                }
+            }
 
-            // $query = "INSERT INTO users VALUES(null,'$name',$price,'$image','$procedence_store',$store_price,$quantity,'$status')";
-            // include 'conexion.php'; //si la pongo por fuera, no funciona :(
-            // $query_prepare = $con->prepare($query);
-            // $query_prepare->execute();
+            $status = "";
+            if ($quantity >= 2 && $quantity <= 5) {
+                $status = "warning";
+            } else if($quantity >= 0 && $quantity <= 1){
+                $status = "empty";
+            } else {
+                $status = "full";
+            }
+
+            $query = "INSERT INTO products VALUES(null,'$name',$price,'$image_name','$procedence_store',$store_price,$quantity,'$status')";
+            include 'conexion.php'; //si la pongo por fuera, no funciona :(
+            $query_prepare = $con->prepare($query);
+            $query_prepare->execute();
+
+            var_dump($query_prepare);
 
             // if ($query_prepare->execute()) {
             //     echo 'todo chido';
             // } else {
             //     echo 'malo';
             // }
+        }
+    }
+    public function getProducts(){
+        $query = "SELECT * FROM products";
+        include 'conexion.php';
+        $query_prepare = $con->prepare($query);
+        $query_prepare->execute();
+        // var_dump($query_prepare->execute());
+        if ($query_prepare->execute()) {
+            return $query_prepare;
+        } else {
+            return false;
         }
     }
 }
