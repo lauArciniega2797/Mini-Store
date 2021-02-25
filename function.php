@@ -110,8 +110,6 @@ class products{
                     $image = isset($_FILES['image']) ? $_FILES['image'] : false;
         
                     var_dump($image);
-
-
                     // $image_name = null;
                     // if ($image) {
                     //     $image_name = $image['name'];
