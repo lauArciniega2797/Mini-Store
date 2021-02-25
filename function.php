@@ -45,56 +45,110 @@ class dashboard {
 
 class products{
     public function index(){
-        require_once 'view/new-product.php';
+        // if(isset($_GET['parameter'])){
+        //     echo 'que transa';
+        // }
+        $productos = $this->getProducts();
+        require_once 'view/products.php';
     }
     public function newProduct(){
+        $id="";$product="";$action="";
+        if (isset($_GET['parameter']) && !empty($_GET['parameter'])) {
+            $product = $this->getProductToEdit($_GET['parameter']);
+            $action = 'editProduct';
+        }
         require_once 'view/new-product.php';
     }
     public function saveProducts(){
         if($_POST){
-            $name = $_POST['name'];
-            $price = $_POST['price'];
-            $procedence_store = $_POST['procedence_store'];
-            $store_price = $_POST['store_price'];
-            $quantity = $_POST['quantity'];
-            $image = isset($_FILES['image']) ? $_FILES['image'] : false;
-
-            $image_name = null;
-            if ($image) {
-                $image_name = $image['name'];
-                if ($image_name != null) {
-                    //almacenar la imagen en un directorio
-                    $directory = 'images/';
-                    move_uploaded_file($image['tmp_name'],$directory.$image_name);
-                }
+            $function = "";
+            if(isset($_GET['function']) && !empty($_GET['function'])){
+                $function =  $_GET['function'];
             }
 
-            $status = "";
-            if ($quantity >= 2 && $quantity <= 5) {
-                $status = "warning";
-            } else if($quantity >= 0 && $quantity <= 1){
-                $status = "empty";
-            } else {
-                $status = "full";
+            switch ($function) {
+                case 'newProduct':
+                    $name = $_POST['name'];
+                    $price = $_POST['price'];
+                    $procedence_store = $_POST['procedence_store'];
+                    $store_price = $_POST['store_price'];
+                    $quantity = $_POST['quantity'];
+                    $image = isset($_FILES['image']) ? $_FILES['image'] : false;
+        
+                    $image_name = null;
+                    if ($image) {
+                        $image_name = $image['name'];
+                        if ($image_name != null) {
+                            //almacenar la imagen en un directorio
+                            $directory = 'images/';
+                            move_uploaded_file($image['tmp_name'],$directory.$image_name);
+                        }
+                    }
+        
+                    $status = "";
+                    if ($quantity >= 2 && $quantity <= 5) {
+                        $status = "warning";
+                    } else if($quantity >= 0 && $quantity <= 1){
+                        $status = "empty";
+                    } else {
+                        $status = "full";
+                    }
+        
+                    $query = "INSERT INTO products VALUES(null,'$name',$price,'$image_name','$procedence_store',$store_price,$quantity,'$status')";
+                    include 'conexion.php'; //si la pongo por fuera, no funciona :(
+                    $query_prepare = $con->prepare($query);
+                    if($query_prepare->execute()){
+                        echo 'done';
+                    }
+                    break;
+                case 'editProduct':
+                    $name = $_POST['name'];
+                    $price = $_POST['price'];
+                    $procedence_store = $_POST['procedence_store'];
+                    $store_price = $_POST['store_price'];
+                    $quantity = $_POST['quantity'];
+                    $image = isset($_FILES['image']) ? $_FILES['image'] : false;
+        
+                    var_dump($image);
+
+
+                    // $image_name = null;
+                    // if ($image) {
+                    //     $image_name = $image['name'];
+                    //     if ($image_name != null) {
+                    //         //almacenar la imagen en un directorio
+                    //         $directory = 'images/';
+                    //         move_uploaded_file($image['tmp_name'],$directory.$image_name);
+                    //     }
+                    // }
+        
+                    // $status = "";
+                    // if ($quantity >= 2 && $quantity <= 5) {
+                    //     $status = "warning";
+                    // } else if($quantity >= 0 && $quantity <= 1){
+                    //     $status = "empty";
+                    // } else {
+                    //     $status = "full";
+                    // }
+        
+                    // $query = "INSERT INTO products VALUES(null,'$name',$price,'$image_name','$procedence_store',$store_price,$quantity,'$status')";
+                    // include 'conexion.php'; //si la pongo por fuera, no funciona :(
+                    // $query_prepare = $con->prepare($query);
+                    // if($query_prepare->execute()){
+                    //     echo 'done';
+                    // }
+                    break;
+                case 'deleteProduct':
+                    # code...
+                    break;
+                default:
+                    # code...
+                    break;
             }
-
-            $query = "INSERT INTO products VALUES(null,'$name',$price,'$image_name','$procedence_store',$store_price,$quantity,'$status')";
-            include 'conexion.php'; //si la pongo por fuera, no funciona :(
-            $query_prepare = $con->prepare($query);
-            if($query_prepare->execute()){
-                echo 'done';
-            }
-
-
-            // if ($query_prepare->execute()) {
-            //     echo 'todo chido';
-            // } else {
-            //     echo 'malo';
-            // }
         }
     }
     public function getProducts(){
-        $query = "SELECT * FROM products";
+        $query = "SELECT * FROM products ORDER BY name ASC";
         include 'conexion.php';
         $query_prepare = $con->prepare($query);
         $query_prepare->execute();
@@ -102,6 +156,32 @@ class products{
         return $row;
     }
     public function getProductsToFinish(){
+        $query = "SELECT * FROM products where status = 'warning'";
+        include 'conexion.php';
+        $query_prepare = $con->prepare($query);
+        $query_prepare->execute();
+        $row = $query_prepare->fetchAll(PDO::FETCH_ASSOC);
+        return $row;
+    }
+    public function getProductsFinished(){
+        $query = "SELECT * FROM products where status = 'empty'";
+        include 'conexion.php';
+        $query_prepare = $con->prepare($query);
+        $query_prepare->execute();
+        $row = $query_prepare->fetchAll(PDO::FETCH_ASSOC);
+        return $row;
+    }
+    public function getProductToEdit($id){
+        $query = "SELECT * FROM products where id=$id";
+        include 'conexion.php';
+        $query_prepare = $con->prepare($query);
+        $query_prepare->execute();
+        $row = $query_prepare->fetchAll(PDO::FETCH_ASSOC);
+        foreach ($row as $producto) {
+            return $producto;
+        }
+    }
+    public function getProductToDelete($id){
         $query = "SELECT * FROM products where status = 'warning' LIMIT 4";
         include 'conexion.php';
         $query_prepare = $con->prepare($query);
@@ -109,5 +189,6 @@ class products{
         $row = $query_prepare->fetchAll(PDO::FETCH_ASSOC);
         return $row;
     }
+
 }
 ?>

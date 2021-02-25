@@ -46,11 +46,12 @@ $('#senData').on('click', function(e){
     // console.log(document.getElementById('file').files[0]);
     e.preventDefault();
     var empty = notEmpty();
+    var actionForm = $(this).attr('data');
 
     if (empty) {
         var dataa = new FormData($('form#newProductForm')[0]);
         $.ajax({
-            url:'index.php?page=products&action=saveProducts',
+            url:'index.php?page=products&action=saveProducts&function='+actionForm,
             type:'POST',
             data: dataa,
             processData: false,
@@ -68,11 +69,13 @@ $('#senData').on('click', function(e){
             }
         });
     } else {
-        // $('#ijiji')
         document.getElementById('failData').style.display = 'block';
         document.getElementById('failData').innerHTML = 'Datos Incompletos';
     }
 })
+
+// FUNCIONES PARA PRODUCTOS
+
 
 function validateLogin(){
     var valueUser = document.getElementById('username').value,
