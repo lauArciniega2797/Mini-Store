@@ -19,6 +19,7 @@
           <li><a href="?page=products&action=">Productos</a></li>
           <li><a href="?page=products&action=newProduct">Nuevo Producto</a></li>
           <li><a href="?page=dashboard&action=">Contacto</a></li>
+          <li><a href="?page=user&action=closeSession">Cerrar sesión</a></li>
         </ul>
       </div>
     </nav>

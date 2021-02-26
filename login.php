@@ -32,7 +32,7 @@
                 <button id="btn-login">Ingresar</button>
             </form>
             <div id="redirecting">
-                <p>Bienvenido, <?= $_SESSION['user']; ?></p>
+                <p>Bienvenido</p>
                 <div class="d-flex justify-content-center">
                     <div class="spinner-border text-light" role="status">
                         <span class="visually-hidden">Loading...</span>

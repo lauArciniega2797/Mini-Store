@@ -1,7 +1,11 @@
 <?php
 class user{
-    public function login(){
+    public function index(){
         require_once 'login.php';
+    }
+    public function closeSession(){
+        session_destroy(); // destruyo la sesión
+        header("Location: index.php");
     }
     public function validateLogin(){
         if (isset($_POST['data'])) {
@@ -61,9 +65,13 @@ class products{
     }
     public function saveProducts(){
         if($_POST){
-            $function = "";
+            $id="";$function = "";
             if(isset($_GET['function']) && !empty($_GET['function'])){
-                $function =  $_GET['function'];
+                $string = str_split($_GET['function']);
+                $function = $string[0].$string[1].$string[2].$string[3].$string[4].$string[5].$string[6].$string[7].$string[8].$string[9].$string[10];
+                $id = $string[10];
+                var_dump($function);
+                var_dump($id);
             }
 
             switch ($function) {
@@ -109,32 +117,34 @@ class products{
                     $quantity = $_POST['quantity'];
                     $image = isset($_FILES['image']) ? $_FILES['image'] : false;
         
-                    var_dump($image);
-                    // $image_name = null;
-                    // if ($image) {
-                    //     $image_name = $image['name'];
-                    //     if ($image_name != null) {
-                    //         //almacenar la imagen en un directorio
-                    //         $directory = 'images/';
-                    //         move_uploaded_file($image['tmp_name'],$directory.$image_name);
-                    //     }
-                    // }
+                    // var_dump($image);
+                    $status = "";
+                    if ($quantity >= 2 && $quantity <= 5) {
+                        $status = "warning";
+                    } else if($quantity >= 0 && $quantity <= 1){
+                        $status = "empty";
+                    } else {
+                        $status = "full";
+                    }
+                    
+                    $image_name = null;
+                    if ($image) {
+                        $image_name = $image['name'];
+                        if ($image_name != null) {
+                            //almacenar la imagen en un directorio
+                            $directory = 'images/';
+                            move_uploaded_file($image['tmp_name'],$directory.$image_name);
+                            $query = "UPDATE products SET name = '$name', price = $price, procedence_store='$procedence_store', image = '$image_name' , store_price=$store_price, quantity=$quantity, status='$status' where id = $id";
+                        } else {
+                            $query = "UPDATE products SET name = '$name', price = $price, procedence_store='$procedence_store', store_price=$store_price, quantity=$quantity, status='$status' where id = $id";
+                        }
+                    }
         
-                    // $status = "";
-                    // if ($quantity >= 2 && $quantity <= 5) {
-                    //     $status = "warning";
-                    // } else if($quantity >= 0 && $quantity <= 1){
-                    //     $status = "empty";
-                    // } else {
-                    //     $status = "full";
-                    // }
-        
-                    // $query = "INSERT INTO products VALUES(null,'$name',$price,'$image_name','$procedence_store',$store_price,$quantity,'$status')";
-                    // include 'conexion.php'; //si la pongo por fuera, no funciona :(
-                    // $query_prepare = $con->prepare($query);
-                    // if($query_prepare->execute()){
-                    //     echo 'done';
-                    // }
+                    include 'conexion.php'; //si la pongo por fuera, no funciona :(
+                    $query_prepare = $con->prepare($query);
+                    if($query_prepare->execute()){
+                        echo 'done';
+                    }
                     break;
                 case 'deleteProduct':
                     # code...

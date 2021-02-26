@@ -24,10 +24,10 @@ session_start();
         echo 'Esa no es una accion valida';
       }
     } else if(empty($_GET['action'])) {
-      if (isset($_SESSION['user'])) {
+      if (isset($_SESSION['user']) && !empty($_SESSION['user'])) {
         $action = "index";
       } else {
-        $action = "login"; //aqui va el login
+        $action = "index"; //aqui va el login
       }
       $objectInstance->$action();
     } else {
