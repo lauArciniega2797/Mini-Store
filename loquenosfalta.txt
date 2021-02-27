@@ -37,6 +37,9 @@ Se ha re
  - avisos en productos (no hay productos, no hay productos por agotarse)
  - en el navegador chrome, actualiza el formulario sin pedirlo.
 
+• Proveedores
+
+
 • ADMIN o USUARIO
  - admin, puede eliminar, editar y agregar productos, proveedores, clientes, deudores, pagos, ventas, login
  - seccion en menu o en la url para entrar a administrador
