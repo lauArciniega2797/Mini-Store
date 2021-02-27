@@ -61,11 +61,19 @@ class products{
     }
     public function saveProducts(){
         if($_POST){
-            $function = "";
+            $function = "";$id="";
             if(isset($_GET['function']) && !empty($_GET['function'])){
                 $function =  $_GET['function'];
             }
-
+            if(isset($_GET['id']) && !empty($_GET['id'])){
+                $id =  $_GET['id'];
+            }
+            if (isset($_POST['function']) && !empty($_POST['function'])) {
+                $function = $_POST['function'];
+            }
+            if (isset($_POST['id']) && !empty($_POST['id'])) {
+                $id = $_POST['id'];
+            }
             switch ($function) {
                 case 'newProduct':
                     $name = $_POST['name'];
@@ -109,38 +117,43 @@ class products{
                     $quantity = $_POST['quantity'];
                     $image = isset($_FILES['image']) ? $_FILES['image'] : false;
         
-                    var_dump($image);
-                    // $image_name = null;
-                    // if ($image) {
-                    //     $image_name = $image['name'];
-                    //     if ($image_name != null) {
-                    //         //almacenar la imagen en un directorio
-                    //         $directory = 'images/';
-                    //         move_uploaded_file($image['tmp_name'],$directory.$image_name);
-                    //     }
-                    // }
+                    $status = "";
+                    if ($quantity >= 2 && $quantity <= 5) {
+                        $status = "warning";
+                    } else if($quantity >= 0 && $quantity <= 1){
+                        $status = "empty";
+                    } else {
+                        $status = "full";
+                    }
+
+                    $image_name = null;
+                    if ($image) {
+                        $image_name = $image['name'];
+                        if ($image_name != null) {
+                            //almacenar la imagen en un directorio
+                            $directory = 'images/';
+                            move_uploaded_file($image['tmp_name'],$directory.$image_name);
+                            $query = "UPDATE products SET name = '$name', price = $price, image = '$image_name', procedence_store = '$procedence_store', store_price = $store_price, quantity=$quantity, status = '$status' WHERE id = $id";
+                        } else {
+                            $query = "UPDATE products SET name = '$name', price = $price, procedence_store = '$procedence_store', store_price = $store_price, quantity=$quantity, status = '$status' WHERE id =  $id";
+                        }
+                    }
         
-                    // $status = "";
-                    // if ($quantity >= 2 && $quantity <= 5) {
-                    //     $status = "warning";
-                    // } else if($quantity >= 0 && $quantity <= 1){
-                    //     $status = "empty";
-                    // } else {
-                    //     $status = "full";
-                    // }
-        
+                    var_dump($query);
                     // $query = "INSERT INTO products VALUES(null,'$name',$price,'$image_name','$procedence_store',$store_price,$quantity,'$status')";
-                    // include 'conexion.php'; //si la pongo por fuera, no funciona :(
-                    // $query_prepare = $con->prepare($query);
-                    // if($query_prepare->execute()){
-                    //     echo 'done';
-                    // }
+                    include 'conexion.php'; //si la pongo por fuera, no funciona :(
+                    $query_prepare = $con->prepare($query);
+                    if($query_prepare->execute()){
+                        echo 'done';
+                    }
                     break;
                 case 'deleteProduct':
-                    # code...
-                    break;
-                default:
-                    # code...
+                    $query = "DELETE FROM products WHERE id = $id";
+                    include 'conexion.php'; //si la pongo por fuera, no funciona :(
+                    $query_prepare = $con->prepare($query);
+                    if($query_prepare->execute()){
+                        echo 'done';
+                    }
                     break;
             }
         }
@@ -179,13 +192,19 @@ class products{
             return $producto;
         }
     }
-    public function getProductToDelete($id){
-        $query = "SELECT * FROM products where status = 'warning' LIMIT 4";
+    public function getProductToDelete(){
+        $id="";
+        if (isset($_GET['id']) && !empty($_GET['id'])) {
+            $id = $_GET['id'];
+        }
+        $query = "SELECT id, name, image FROM products where id=$id";
         include 'conexion.php';
         $query_prepare = $con->prepare($query);
         $query_prepare->execute();
         $row = $query_prepare->fetchAll(PDO::FETCH_ASSOC);
-        return $row;
+        // var_dump($row);
+        
+        echo json_encode($row);
     }
 
 }

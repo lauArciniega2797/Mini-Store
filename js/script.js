@@ -45,33 +45,76 @@ $('#btn-login').on('click', function(e) {
 $('#senData').on('click', function(e){
     // console.log(document.getElementById('file').files[0]);
     e.preventDefault();
-    var empty = notEmpty();
     var actionForm = $(this).attr('data');
-
-    if (empty) {
-        var dataa = new FormData($('form#newProductForm')[0]);
+    var dataID = $(this).attr('data-id');
+    if (actionForm != 'deleteProduct') {
+        if (notEmpty()) {
+            var dataa = new FormData($('form#newProductForm')[0]);
+            $.ajax({
+                url:'index.php?page=products&action=saveProducts&function='+actionForm+'&id='+dataID,
+                type:'POST',
+                data: dataa,
+                processData: false,
+                contentType: false,
+                success:function(response){
+                    if (response) {
+                        $('#successData').html('Los datos se guardaron correctamente');
+                        $('#successData').css({'display':'block'});
+                    }
+                    setTimeout(() => {
+                        $('form#newProductForm')[0].reset();
+                        $('form#newProductForm').find('input').attr('value','');
+                        $('.box-image').css({'background-image':'none'});
+                        $('#successData').css({'display':'none'});
+                        window.location.href = '?page=products&action=';
+                    }, 4000);
+                }
+            });
+        } else {
+            document.getElementById('failData').style.display = 'block';
+            document.getElementById('failData').innerHTML = 'Datos Incompletos';
+        }
+    } else {
         $.ajax({
-            url:'index.php?page=products&action=saveProducts&function='+actionForm,
+            url:'?page=products&action=saveProducts',
+            data: {
+                'function': actionForm,
+                'id': $(this).attr('href')
+            },
             type:'POST',
-            data: dataa,
-            processData: false,
-            contentType: false,
             success:function(response){
-                if (response == 'done') {
-                    $('#successData').html('Los datos se guardaron correctamente');
-                    $('#successData').css({'display':'block'});
+                console.log(response);
+                if (response) {
+                    $('#successDataModal').html('Se ha eliminado el producto');
+                    $('#successDataModal').css({'display':'block'});
+                    // return false;
                 }
                 setTimeout(() => {
-                    $('form#newProductForm')[0].reset();
-                    $('.box-image').css({'background-image':'none'})
-                    $('#successData').css({'display':'none'})
-                }, 4000);
+                    $('#successDataModal').css({'display':'none'})
+                    $('.btn-close').trigger('click');
+                    location.reload();
+                }, 3000);
             }
         });
-    } else {
-        document.getElementById('failData').style.display = 'block';
-        document.getElementById('failData').innerHTML = 'Datos Incompletos';
     }
+})
+$('.deleteProductData').on('click', function(e){
+    e.preventDefault();
+    $.ajax({
+        url:$(e.target).attr('data-href'),
+        type:'POST',
+        dataType:'json',
+        success:(response) => {
+            // Con esta funcion, puedo recorrer un array que viene de php
+            $.each(response, function (indice,valor) {
+                $('.modal-footer').find('a#senData').prop('href',valor.id);
+                // $('.modal-footer').find('#senData').attr('data-id',valor.id);
+                $('#imageProductDelet').attr('src', 'images/'+valor.image);
+                $('#imageProductDelet').attr('alt', 'Eunicodin'+valor.name);
+                $('#nameProductDelete').html(valor.name);
+            })
+        }
+    })
 })
 
 // FUNCIONES PARA PRODUCTOS
