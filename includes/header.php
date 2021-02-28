@@ -11,16 +11,43 @@
 </head>
 <body>
   <header id="header">
-    <nav>
-      <div><h2>EUNICODIN</h2></div>
-      <div>
-        <ul>
-          <li><a href="?page=dashboard&action=">Inicio</a></li>
-          <li><a href="?page=products&action=">Productos</a></li>
-          <li><a href="?page=products&action=newProduct">Nuevo Producto</a></li>
-          <li><a href="?page=dashboard&action=">Contacto</a></li>
-          <li><a href="?page=user&action=closeSession">Cerrar sesión</a></li>
-        </ul>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+      <div class="container-fluid">
+        <a class="navbar-brand" href="#">EUNICODIN</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNavDropdown">
+          <ul class="navbar-nav">
+            <li class="nav-item">
+              <a class="nav-link active" aria-current="page" href="?page=dashboard&action=">Inicio</a>
+            </li>
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" id="navbarDropdownMenuLink" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                Productos
+              </a>
+              <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                <li><a class="dropdown-item" href="?page=products&action=">Produtos</a></li>
+                <li><a class="dropdown-item" href="?page=products&action=newProduct">Nuevo producto</a></li>
+              </ul>
+            </li>
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" id="navbarDropdownMenuLink" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                Clientes
+              </a>
+              <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                <li><a class="dropdown-item" href="?page=products&action=">Clientes</a></li>
+                <li><a class="dropdown-item" href="?page=clients&action=newClient">Nuevo Cliente</a></li>
+              </ul>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#">Contactos</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="?page=user&action=closeSesion">Cerrar sesion</a>
+            </li>
+          </ul>
+        </div>
       </div>
     </nav>
   </header>

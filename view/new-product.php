@@ -58,7 +58,7 @@ require_once 'includes/header.php';
                             <!-- <label for="" id="error-message"></label> -->
                         </div>
                     </div>
-                    <a id="senData" href="javascript(void)" class="btn btn-primary" data="<?=isset($action) && !empty($action) ? $action.$product['id'] : 'newProduct';?>">Guardar</a>
+                    <a id="senData" href="javascript(void)" class="btn btn-primary" data-id="<?=isset($action) && !empty($action) ? $product['id'] : '';?>" data="<?=isset($action) && !empty($action) ? $action : 'newProduct';?>">Guardar</a>
                 </div>
             </div>
         </form>

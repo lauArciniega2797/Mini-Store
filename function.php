@@ -3,9 +3,9 @@ class user{
     public function index(){
         require_once 'login.php';
     }
-    public function closeSession(){
-        session_destroy(); // destruyo la sesión
-        header("Location: index.php");
+    public function closeSesion(){
+        session_destroy();
+        header('Location: ?page=user&action=');
     }
     public function validateLogin(){
         if (isset($_POST['data'])) {
@@ -65,7 +65,7 @@ class products{
     }
     public function saveProducts(){
         if($_POST){
-            $id="";$function = "";
+            $function = "";$id="";
             if(isset($_GET['function']) && !empty($_GET['function'])){
                 $string = str_split($_GET['function']);
                 $function = $string[0].$string[1].$string[2].$string[3].$string[4].$string[5].$string[6].$string[7].$string[8].$string[9].$string[10];
@@ -73,7 +73,15 @@ class products{
                 var_dump($function);
                 var_dump($id);
             }
-
+            if(isset($_GET['id']) && !empty($_GET['id'])){
+                $id =  $_GET['id'];
+            }
+            if (isset($_POST['function']) && !empty($_POST['function'])) {
+                $function = $_POST['function'];
+            }
+            if (isset($_POST['id']) && !empty($_POST['id'])) {
+                $id = $_POST['id'];
+            }
             switch ($function) {
                 case 'newProduct':
                     $name = $_POST['name'];
@@ -117,7 +125,6 @@ class products{
                     $quantity = $_POST['quantity'];
                     $image = isset($_FILES['image']) ? $_FILES['image'] : false;
         
-                    // var_dump($image);
                     $status = "";
                     if ($quantity >= 2 && $quantity <= 5) {
                         $status = "warning";
@@ -126,7 +133,6 @@ class products{
                     } else {
                         $status = "full";
                     }
-                    
                     $image_name = null;
                     if ($image) {
                         $image_name = $image['name'];
@@ -134,12 +140,14 @@ class products{
                             //almacenar la imagen en un directorio
                             $directory = 'images/';
                             move_uploaded_file($image['tmp_name'],$directory.$image_name);
-                            $query = "UPDATE products SET name = '$name', price = $price, procedence_store='$procedence_store', image = '$image_name' , store_price=$store_price, quantity=$quantity, status='$status' where id = $id";
+                            $query = "UPDATE products SET name = '$name', price = $price, image = '$image_name', procedence_store = '$procedence_store', store_price = $store_price, quantity=$quantity, status = '$status' WHERE id = $id";
                         } else {
-                            $query = "UPDATE products SET name = '$name', price = $price, procedence_store='$procedence_store', store_price=$store_price, quantity=$quantity, status='$status' where id = $id";
+                            $query = "UPDATE products SET name = '$name', price = $price, procedence_store = '$procedence_store', store_price = $store_price, quantity=$quantity, status = '$status' WHERE id =  $id";
                         }
                     }
         
+                    var_dump($query);
+                    // $query = "INSERT INTO products VALUES(null,'$name',$price,'$image_name','$procedence_store',$store_price,$quantity,'$status')";
                     include 'conexion.php'; //si la pongo por fuera, no funciona :(
                     $query_prepare = $con->prepare($query);
                     if($query_prepare->execute()){
@@ -147,10 +155,12 @@ class products{
                     }
                     break;
                 case 'deleteProduct':
-                    # code...
-                    break;
-                default:
-                    # code...
+                    $query = "DELETE FROM products WHERE id = $id";
+                    include 'conexion.php'; //si la pongo por fuera, no funciona :(
+                    $query_prepare = $con->prepare($query);
+                    if($query_prepare->execute()){
+                        echo 'done';
+                    }
                     break;
             }
         }
@@ -189,14 +199,32 @@ class products{
             return $producto;
         }
     }
-    public function getProductToDelete($id){
-        $query = "SELECT * FROM products where status = 'warning' LIMIT 4";
+    public function getProductToDelete(){
+        $id="";
+        if (isset($_GET['id']) && !empty($_GET['id'])) {
+            $id = $_GET['id'];
+        }
+        $query = "SELECT id, name, image FROM products where id=$id";
         include 'conexion.php';
         $query_prepare = $con->prepare($query);
         $query_prepare->execute();
         $row = $query_prepare->fetchAll(PDO::FETCH_ASSOC);
-        return $row;
+        // var_dump($row);
+        
+        echo json_encode($row);
     }
 
+}
+
+class clients {
+    public function index(){
+        require_once 'view/new-client.php';
+    }
+    public function newClient(){
+        require_once 'view/new-client.php';
+    }
+    public function saveClient(){
+        var_dump($_POST);
+    }
 }
 ?>
