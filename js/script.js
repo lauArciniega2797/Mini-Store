@@ -117,6 +117,30 @@ $('.deleteProductData').on('click', function(e){
     })
 })
 
+/* ---------- INSERT CLIENT ON DATABASE ----------  */
+$('#sendClient').on('click', (e) => {
+    e.preventDefault();
+    $.ajax({
+        url:'?page=clients&action=saveClient',
+        data:$('#newClientForm').serialize(),
+        type:'POST',
+        success:(response)=>{
+            console.log(response);
+        }
+    })
+})
+$("#flexCheckDefault").on('change', function() {
+    if( $(this).is(':checked') ) {
+        // Hacer algo si el checkbox ha sido seleccionado
+        $('#inputCreditLimit').removeAttr('disabled');
+        $('#inputCreditDays').removeAttr('disabled');
+    } else {
+        // Hacer algo si el checkbox ha sido deseleccionado
+        $('#inputCreditLimit').prop('disabled', true);
+        $('#inputCreditDays').prop('disabled', true);
+    }
+});
+
 // FUNCIONES PARA PRODUCTOS
 
 

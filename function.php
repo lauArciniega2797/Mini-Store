@@ -3,6 +3,10 @@ class user{
     public function login(){
         require_once 'login.php';
     }
+    public function closeSesion(){
+        session_destroy();
+        header('Location: ?page=user&action=');
+    }
     public function validateLogin(){
         if (isset($_POST['data'])) {
             // echo 'pero que ha pasao';
@@ -207,5 +211,17 @@ class products{
         echo json_encode($row);
     }
 
+}
+
+class clients {
+    public function index(){
+        require_once 'view/new-client.php';
+    }
+    public function newClient(){
+        require_once 'view/new-client.php';
+    }
+    public function saveClient(){
+        var_dump($_POST);
+    }
 }
 ?>
