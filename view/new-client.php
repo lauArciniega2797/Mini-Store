@@ -37,7 +37,7 @@ require_once 'includes/header.php';
                         <div class="col-md-6">
                             <div class="form-check">
                                 <!-- <input type="checkbox" name="approved_credit"  id="inputAC"> -->
-                                <input class="form-check-input" type="checkbox" value="<?=isset($client['approved_credit']) && !empty($client['approved_credit']) ? $client['approved_credit'] : '';?>" class="form-control" id="flexCheckDefault">
+                                <input class="form-check-input" type="checkbox" name="checkCredit" value="<?=isset($client['approved_credit']) && !empty($client['approved_credit']) ? $client['approved_credit'] : '';?>" id="flexCheckDefault">
                                 <label class="form-check-label" for="flexCheckDefault">
                                     Crédito Aprobado
                                 </label>

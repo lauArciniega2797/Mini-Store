@@ -36,7 +36,7 @@
                 Clientes
               </a>
               <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
-                <li><a class="dropdown-item" href="?page=products&action=">Clientes</a></li>
+                <li><a class="dropdown-item" href="?page=clients&action=">Clientes</a></li>
                 <li><a class="dropdown-item" href="?page=clients&action=newClient">Nuevo Cliente</a></li>
               </ul>
             </li>

@@ -218,13 +218,150 @@ class products{
 
 class clients {
     public function index(){
-        require_once 'view/new-client.php';
+        $client = $this->getClients();
+        require_once 'view/clients.php';
     }
     public function newClient(){
+        $id="";$client="";$action="";
+        if (isset($_GET['parameter']) && !empty($_GET['parameter'])) {
+            $client = $this->getClientToEdit($_GET['parameter']);
+            $action = 'editClient';
+        }
         require_once 'view/new-client.php';
     }
     public function saveClient(){
         var_dump($_POST);
+        if($_POST){
+            $function = "";$id="";
+            if(isset($_GET['function']) && !empty($_GET['function'])){                
+                $function = $_GET['function'];
+            }
+            if(isset($_GET['id']) && !empty($_GET['id'])){
+                $id =  $_GET['id'];
+            }
+            if (isset($_POST['function']) && !empty($_POST['function'])) {
+                $function = $_POST['function'];
+            }
+            if (isset($_POST['id']) && !empty($_POST['id'])) {
+                $id = $_POST['id'];
+            }
+            switch ($function) {
+                case 'newClient':
+                    if (isset($_POST['checkCredit'])) {
+                        echo "checked!";
+                    }
+                //     $name = $_POST['name'];
+                //     $price = $_POST['price'];
+                //     $procedence_store = $_POST['procedence_store'];
+                //     $store_price = $_POST['store_price'];
+                //     $quantity = $_POST['quantity'];
+                //     $image = isset($_FILES['image']) ? $_FILES['image'] : false;
+        
+                //     $image_name = null;
+                //     if ($image) {
+                //         $image_name = $image['name'];
+                //         if ($image_name != null) {
+                //             //almacenar la imagen en un directorio
+                //             $directory = 'images/';
+                //             move_uploaded_file($image['tmp_name'],$directory.$image_name);
+                //         }
+                //     }
+        
+                //     $status = "";
+                //     if ($quantity >= 2 && $quantity <= 5) {
+                //         $status = "warning";
+                //     } else if($quantity >= 0 && $quantity <= 1){
+                //         $status = "empty";
+                //     } else {
+                //         $status = "full";
+                //     }
+        
+                //     $query = "INSERT INTO products VALUES(null,'$name',$price,'$image_name','$procedence_store',$store_price,$quantity,'$status')";
+                //     include 'conexion.php'; //si la pongo por fuera, no funciona :(
+                //     $query_prepare = $con->prepare($query);
+                //     if($query_prepare->execute()){
+                //         echo 'done';
+                //     }
+                    break;
+                // case 'editClient':
+                //     $name = $_POST['name'];
+                //     $price = $_POST['price'];
+                //     $procedence_store = $_POST['procedence_store'];
+                //     $store_price = $_POST['store_price'];
+                //     $quantity = $_POST['quantity'];
+                //     $image = isset($_FILES['image']) ? $_FILES['image'] : false;
+        
+                //     $status = "";
+                //     if ($quantity >= 2 && $quantity <= 5) {
+                //         $status = "warning";
+                //     } else if($quantity >= 0 && $quantity <= 1){
+                //         $status = "empty";
+                //     } else {
+                //         $status = "full";
+                //     }
+                //     $image_name = null;
+                //     if ($image) {
+                //         $image_name = $image['name'];
+                //         if ($image_name != null) {
+                //             //almacenar la imagen en un directorio
+                //             $directory = 'images/';
+                //             move_uploaded_file($image['tmp_name'],$directory.$image_name);
+                //             $query = "UPDATE client SET name = '$name', price = $price, image = '$image_name', procedence_store = '$procedence_store', store_price = $store_price, quantity=$quantity, status = '$status' WHERE id = $id";
+                //         } else {
+                //             $query = "UPDATE clients SET name = '$name', price = $price, procedence_store = '$procedence_store', store_price = $store_price, quantity=$quantity, status = '$status' WHERE id =  $id";
+                //         }
+                //     }
+        
+                //     var_dump($query);
+                //     // $query = "INSERT INTO products VALUES(null,'$name',$price,'$image_name','$procedence_store',$store_price,$quantity,'$status')";
+                //     include 'conexion.php'; //si la pongo por fuera, no funciona :(
+                //     $query_prepare = $con->prepare($query);
+                //     if($query_prepare->execute()){
+                //         echo 'done';
+                //     }
+                //     break;
+                // case 'deleteClient':
+                //     $query = "DELETE FROM clients WHERE id = $id";
+                //     include 'conexion.php'; //si la pongo por fuera, no funciona :(
+                //     $query_prepare = $con->prepare($query);
+                //     if($query_prepare->execute()){
+                //         echo 'done';
+                //     }
+                //     break;
+            }
+        }
+    }
+    public function getClients(){
+        $query = "SELECT * FROM clients ORDER BY name ASC";
+        include 'conexion.php';
+        $query_prepare = $con->prepare($query);
+        $query_prepare->execute();
+        $row = $query_prepare->fetchAll(PDO::FETCH_ASSOC);
+        return $row;
+    }
+    public function getClientToEdit($id){
+        $query = "SELECT * FROM clients where id=$id";
+        include 'conexion.php';
+        $query_prepare = $con->prepare($query);
+        $query_prepare->execute();
+        $row = $query_prepare->fetchAll(PDO::FETCH_ASSOC);
+        foreach ($row as $producto) {
+            return $producto;
+        }
+    }
+    public function getClientToDelete(){
+        $id="";
+        if (isset($_GET['id']) && !empty($_GET['id'])) {
+            $id = $_GET['id'];
+        }
+        $query = "SELECT id, name FROM clients where id=$id";
+        include 'conexion.php';
+        $query_prepare = $con->prepare($query);
+        $query_prepare->execute();
+        $row = $query_prepare->fetchAll(PDO::FETCH_ASSOC);
+        // var_dump($row);
+        
+        echo json_encode($row);
     }
 }
 ?>

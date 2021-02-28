@@ -120,8 +120,11 @@ $('.deleteProductData').on('click', function(e){
 /* ---------- INSERT CLIENT ON DATABASE ----------  */
 $('#sendClient').on('click', (e) => {
     e.preventDefault();
+    var actionForm = $(this).attr('data');
+    var dataID = $(this).attr('data-id');
+    console.log('?page=clients&action=saveClient&function='+actionForm+'&id='+dataID);
     $.ajax({
-        url:'?page=clients&action=saveClient',
+        url:'?page=clients&action=saveClient&function='+actionForm+'&id='+dataID,
         data:$('#newClientForm').serialize(),
         type:'POST',
         success:(response)=>{
