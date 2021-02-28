@@ -25,7 +25,7 @@
     </div>
     <a href="?page=products&action=" class="btn btn-primary" id="productstofinish">Ver mas productos por terminar</a>
       
-      <h2>Mas vendidos</h2>
+      <h2>Principales Deudores</h2>
       <div class="">
             
       </div>

@@ -1,6 +1,6 @@
 <?php
 class user{
-    public function login(){
+    public function index(){
         require_once 'login.php';
     }
     public function closeSesion(){
@@ -67,7 +67,11 @@ class products{
         if($_POST){
             $function = "";$id="";
             if(isset($_GET['function']) && !empty($_GET['function'])){
-                $function =  $_GET['function'];
+                $string = str_split($_GET['function']);
+                $function = $string[0].$string[1].$string[2].$string[3].$string[4].$string[5].$string[6].$string[7].$string[8].$string[9].$string[10];
+                $id = $string[10];
+                var_dump($function);
+                var_dump($id);
             }
             if(isset($_GET['id']) && !empty($_GET['id'])){
                 $id =  $_GET['id'];
@@ -129,7 +133,6 @@ class products{
                     } else {
                         $status = "full";
                     }
-
                     $image_name = null;
                     if ($image) {
                         $image_name = $image['name'];
