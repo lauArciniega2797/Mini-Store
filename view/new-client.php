@@ -1,7 +1,6 @@
 <?php
 require_once 'includes/header.php';
 ?>
-
 <body>
     <section class="container">
         <h2 style="margin-bottom:30px;">Nuevo Cliente</h2>
@@ -37,7 +36,13 @@ require_once 'includes/header.php';
                         <div class="col-md-6">
                             <div class="form-check">
                                 <!-- <input type="checkbox" name="approved_credit"  id="inputAC"> -->
-                                <input class="form-check-input" type="checkbox" name="checkCredit" value="<?=isset($client['approved_credit']) && !empty($client['approved_credit']) ? $client['approved_credit'] : '';?>" id="flexCheckDefault">
+                                <?php if(isset($client) && !empty($client) && $client['approved_credit'] == '0'):?>
+                                    <input class="form-check-input" type="checkbox" name="checkCredit" value="<?=isset($client['approved_credit']) && !empty($client['approved_credit']) ? $client['approved_credit'] : '1';?>" id="flexCheckDefault" checked>
+                                <?php elseif((isset($client) && !empty($client) && $client['approved_credit'] == '1')):?>
+                                    <input class="form-check-input" type="checkbox" name="checkCredit" value="<?=isset($client['approved_credit']) && !empty($client['approved_credit']) ? $client['approved_credit'] : '1';;?>" id="flexCheckDefault">
+                                <?php else:?>
+                                    <input class="form-check-input" type="checkbox" name="checkCredit" value="<?=isset($client['approved_credit']) && !empty($client['approved_credit']) ? $client['approved_credit'] : '1';;?>" id="flexCheckDefault">
+                                <?php endif;?>
                                 <label class="form-check-label" for="flexCheckDefault">
                                     Crédito Aprobado
                                 </label>

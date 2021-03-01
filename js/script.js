@@ -1,3 +1,10 @@
+$(document).ready(function(){
+if ($('#flexCheckDefault').is(':checked')) {
+    $('#inputCreditLimit').removeAttr('disabled');
+    $('#inputCreditDays').removeAttr('disabled');
+    $("#flexCheckDefault").attr('value', '0');
+}
+});
 var body = document.body, html = document.documentElement;
 var total_height = Math.max(body.scrollHeight, body.offsetHeight, html.clientHeight, html.scrollHeight, html.offsetHeight);
 if (document.getElementById('footer') != null && document.getElementById('header') != null) {
@@ -108,6 +115,7 @@ $('.deleteProductData').on('click', function(e){
             // Con esta funcion, puedo recorrer un array que viene de php
             $.each(response, function (indice,valor) {
                 $('.modal-footer').find('a#senData').prop('href',valor.id);
+                $('.modal-footer').find('a#sendClient').prop('href',valor.id);
                 // $('.modal-footer').find('#senData').attr('data-id',valor.id);
                 $('#imageProductDelet').attr('src', 'images/'+valor.image);
                 $('#imageProductDelet').attr('alt', 'Eunicodin'+valor.name);
@@ -118,29 +126,62 @@ $('.deleteProductData').on('click', function(e){
 })
 
 /* ---------- INSERT CLIENT ON DATABASE ----------  */
-$('#sendClient').on('click', (e) => {
+$('#sendClient').on('click', function(e) {
     e.preventDefault();
     var actionForm = $(this).attr('data');
     var dataID = $(this).attr('data-id');
+
+    console.log($(this));
+    console.log($(this).attr('data'));
+
     console.log('?page=clients&action=saveClient&function='+actionForm+'&id='+dataID);
-    $.ajax({
-        url:'?page=clients&action=saveClient&function='+actionForm+'&id='+dataID,
-        data:$('#newClientForm').serialize(),
-        type:'POST',
-        success:(response)=>{
-            console.log(response);
-        }
-    })
+    if (actionForm != 'deleteClient') {
+        $.ajax({
+            url:'?page=clients&action=saveClient&function='+actionForm+'&id='+dataID,
+            data:$('#newClientForm').serialize(),
+            type:'POST',
+            success:(response)=>{
+                console.log(response);
+            }
+        })
+    } else {
+        console.log(actionForm);
+        console.log($(this));
+        console.log($(this).attr('href'));
+        $.ajax({
+            url:'?page=clients&action=saveClient',
+            data: {
+                'function': actionForm,
+                'id': $(this).attr('href')
+            },
+            type:'POST',
+            success:function(response){
+                console.log(response);
+                if (response) {
+                    $('#successDataModal').html('Se ha eliminado el producto');
+                    $('#successDataModal').css({'display':'block'});
+                    // return false;
+                }
+                setTimeout(() => {
+                    $('#successDataModal').css({'display':'none'})
+                    $('.btn-close').trigger('click');
+                    location.reload();
+                }, 3000);
+            }
+        });
+    }
 })
 $("#flexCheckDefault").on('change', function() {
     if( $(this).is(':checked') ) {
         // Hacer algo si el checkbox ha sido seleccionado
         $('#inputCreditLimit').removeAttr('disabled');
         $('#inputCreditDays').removeAttr('disabled');
+        $("#flexCheckDefault").attr('value', '0');
     } else {
         // Hacer algo si el checkbox ha sido deseleccionado
         $('#inputCreditLimit').prop('disabled', true);
         $('#inputCreditDays').prop('disabled', true);
+        $("#flexCheckDefault").attr('value', '1');
     }
 });
 

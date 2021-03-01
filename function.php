@@ -67,11 +67,7 @@ class products{
         if($_POST){
             $function = "";$id="";
             if(isset($_GET['function']) && !empty($_GET['function'])){
-                $string = str_split($_GET['function']);
-                $function = $string[0].$string[1].$string[2].$string[3].$string[4].$string[5].$string[6].$string[7].$string[8].$string[9].$string[10];
-                $id = $string[10];
-                var_dump($function);
-                var_dump($id);
+                $function = $_GET['function'];
             }
             if(isset($_GET['id']) && !empty($_GET['id'])){
                 $id =  $_GET['id'];
@@ -229,11 +225,12 @@ class clients {
         }
         require_once 'view/new-client.php';
     }
+    // http://localhost/Mini-Store/?page=clients&action=saveClient&function=undefined&id=undefined
     public function saveClient(){
-        var_dump($_POST);
         if($_POST){
+            var_dump($_POST);
             $function = "";$id="";
-            if(isset($_GET['function']) && !empty($_GET['function'])){                
+            if(isset($_GET['function']) && !empty($_GET['function'])){
                 $function = $_GET['function'];
             }
             if(isset($_GET['id']) && !empty($_GET['id'])){
@@ -245,94 +242,72 @@ class clients {
             if (isset($_POST['id']) && !empty($_POST['id'])) {
                 $id = $_POST['id'];
             }
+            var_dump($id);
+            var_dump($function);
             switch ($function) {
                 case 'newClient':
-                    if (isset($_POST['checkCredit'])) {
-                        echo "checked!";
+                    $name = $_POST['name'];
+                    $email = $_POST['email'];
+                    $phone = $_POST['phone'];
+                    $bank_reference = $_POST['bank_reference'];
+                    $query="";
+
+                    if (isset($_POST["checkCredit"]) && $_POST["checkCredit"] == 0){
+                        echo "Checkbox seleccionado";
+                        $credit_limit = $_POST['credit_limit'];
+                        $credit_days = $_POST['credit_days'];
+                        // INSERT INTO clients VALUES(null,'margarita','example@example.com',15467984,0,200,2,1234567890)
+                        $query = 'INSERT INTO clients VALUES(null,"'.$name.'","'.$email.'",'.$phone.','.$_POST['checkCredit'].','.$credit_limit.','.$credit_days.','.$bank_reference.')';
+                    } else{
+                        echo "Checkbox no seleccionado";
+                        $query = 'INSERT INTO clients VALUES(null,"'.$name.'","'.$email.'",'.$phone.',1,null,null,'.$bank_reference.')';
+                        // $query = 'INSERT INTO clients VALUES(null,'$name','$email','$phone',null,null,null,'$bank_reference')';
                     }
-                //     $name = $_POST['name'];
-                //     $price = $_POST['price'];
-                //     $procedence_store = $_POST['procedence_store'];
-                //     $store_price = $_POST['store_price'];
-                //     $quantity = $_POST['quantity'];
-                //     $image = isset($_FILES['image']) ? $_FILES['image'] : false;
-        
-                //     $image_name = null;
-                //     if ($image) {
-                //         $image_name = $image['name'];
-                //         if ($image_name != null) {
-                //             //almacenar la imagen en un directorio
-                //             $directory = 'images/';
-                //             move_uploaded_file($image['tmp_name'],$directory.$image_name);
-                //         }
-                //     }
-        
-                //     $status = "";
-                //     if ($quantity >= 2 && $quantity <= 5) {
-                //         $status = "warning";
-                //     } else if($quantity >= 0 && $quantity <= 1){
-                //         $status = "empty";
-                //     } else {
-                //         $status = "full";
-                //     }
-        
-                //     $query = "INSERT INTO products VALUES(null,'$name',$price,'$image_name','$procedence_store',$store_price,$quantity,'$status')";
-                //     include 'conexion.php'; //si la pongo por fuera, no funciona :(
-                //     $query_prepare = $con->prepare($query);
-                //     if($query_prepare->execute()){
-                //         echo 'done';
-                //     }
+                    include 'conexion.php'; //si la pongo por fuera, no funciona :(
+                    $query_prepare = $con->prepare($query);
+                    if($query_prepare->execute()){
+                        echo 'done';
+                    }
                     break;
-                // case 'editClient':
-                //     $name = $_POST['name'];
-                //     $price = $_POST['price'];
-                //     $procedence_store = $_POST['procedence_store'];
-                //     $store_price = $_POST['store_price'];
-                //     $quantity = $_POST['quantity'];
-                //     $image = isset($_FILES['image']) ? $_FILES['image'] : false;
-        
-                //     $status = "";
-                //     if ($quantity >= 2 && $quantity <= 5) {
-                //         $status = "warning";
-                //     } else if($quantity >= 0 && $quantity <= 1){
-                //         $status = "empty";
-                //     } else {
-                //         $status = "full";
-                //     }
-                //     $image_name = null;
-                //     if ($image) {
-                //         $image_name = $image['name'];
-                //         if ($image_name != null) {
-                //             //almacenar la imagen en un directorio
-                //             $directory = 'images/';
-                //             move_uploaded_file($image['tmp_name'],$directory.$image_name);
-                //             $query = "UPDATE client SET name = '$name', price = $price, image = '$image_name', procedence_store = '$procedence_store', store_price = $store_price, quantity=$quantity, status = '$status' WHERE id = $id";
-                //         } else {
-                //             $query = "UPDATE clients SET name = '$name', price = $price, procedence_store = '$procedence_store', store_price = $store_price, quantity=$quantity, status = '$status' WHERE id =  $id";
-                //         }
-                //     }
-        
-                //     var_dump($query);
-                //     // $query = "INSERT INTO products VALUES(null,'$name',$price,'$image_name','$procedence_store',$store_price,$quantity,'$status')";
-                //     include 'conexion.php'; //si la pongo por fuera, no funciona :(
-                //     $query_prepare = $con->prepare($query);
-                //     if($query_prepare->execute()){
-                //         echo 'done';
-                //     }
-                //     break;
-                // case 'deleteClient':
-                //     $query = "DELETE FROM clients WHERE id = $id";
-                //     include 'conexion.php'; //si la pongo por fuera, no funciona :(
-                //     $query_prepare = $con->prepare($query);
-                //     if($query_prepare->execute()){
-                //         echo 'done';
-                //     }
-                //     break;
+                case 'editClient':
+                    echo 'Esta llegando a editar';
+                    $name = $_POST['name'];
+                    $email = $_POST['email'];
+                    $phone = $_POST['phone'];
+                    $bank_reference = $_POST['bank_reference'];
+                    $query="";
+
+                    if (isset($_POST["checkCredit"]) && $_POST["checkCredit"] == 0){
+                        echo "Checkbox seleccionado";
+                        $credit_limit = $_POST['credit_limit'];
+                        $credit_days = $_POST['credit_days'];
+                        // INSERT INTO clients VALUES(null,'margarita','example@example.com',15467984,0,200,2,1234567890)
+                        $query = 'UPDATE clients SET name = "'.$name.'", email = "'.$email.'", phone = '.$phone.', approved_credit = '.$_POST['checkCredit'].', credit_limit = '.$credit_limit.', credit_days = '.$credit_days.', bank_reference = '.$bank_reference.' WHERE id = '.$id;
+                    } else{
+                        echo "Checkbox no seleccionado";
+                        $query = 'UPDATE clients SET name = "'.$name.'", email = "'.$email.'", phone = '.$phone.', approved_credit = 1, credit_limit = null, credit_days = null, bank_reference = '.$bank_reference.' WHERE id = '.$id;
+                    }
+
+                    var_dump($query);
+                    include 'conexion.php'; //si la pongo por fuera, no funciona :(
+                    $query_prepare = $con->prepare($query);
+                    if($query_prepare->execute()){
+                        echo 'done';
+                    }
+                    break;
+                case 'deleteClient':
+                    $query = "DELETE FROM clients WHERE id = $id";
+                    include 'conexion.php'; //si la pongo por fuera, no funciona :(
+                    $query_prepare = $con->prepare($query);
+                    if($query_prepare->execute()){
+                        echo 'done';
+                    }
+                    break;
             }
         }
     }
     public function getClients(){
-        $query = "SELECT * FROM clients ORDER BY name ASC";
+        $query = "SELECT * FROM clients ORDER BY id";
         include 'conexion.php';
         $query_prepare = $con->prepare($query);
         $query_prepare->execute();

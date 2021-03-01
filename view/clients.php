@@ -8,17 +8,38 @@
     </article>
     <article id="products">
         <div class="carousel-productos">
-        <?php foreach ($client as $clien): ?>
-            <div class="card" style="width: 18rem;">
-                <div class="card-body">
-                    <h5 class="card-title"><?=$clien['name']?></h5>
-                    <p class="card-text"><?=$clien['store_price']?></p>
-                    <a href="?page=products&action=newProduct&parameter=<?=$clien['id']?>" class="btn btn-primary">Editar</a>
+            <table style="width:100%">
+                <thead>
+                    <tr>
+                        <th>No.</th>
+                        <th>Nombre</th>
+                        <th>Email</th>
+                        <th>Telefono</th>
+                        <th>Credito aprovado</th>
+                        <th>Limite de credito</th>
+                        <th>Dias de credito</th>
+                        <th>Banco de referencia</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                <?php foreach ($client as $clien): ?>
+                    <tr>
+                        <td><?=$clien['id']?></td>
+                        <td><?=$clien['name']?></td>
+                        <td><?=$clien['email']?></td>
+                        <td><?=$clien['phone']?></td>
+                        <td><?=$clien['approved_credit']?></td>
+                        <td><?=$clien['credit_limit']?></td>
+                        <td><?=$clien['credit_days']?></td>
+                        <td><?=$clien['bank_reference']?></td>
+                        <td><a href="?page=clients&action=newClient&parameter=<?=$clien['id']?>" class="btn btn-primary">Editar</a>
                     <!-- Button trigger modal -->
-                    <a type="button" data-bs-toggle="modal" data-bs-target="#deleteModal" class="deleteProductData btn btn-danger" data-href="?page=clients&action=getClientToDelete&id=<?=$clien['id']?>">Eliminar</a>
-                </div>
-            </div>
-        <?php endforeach;?>
+                    <a type="button" data-bs-toggle="modal" data-bs-target="#deleteModal" class="deleteProductData btn btn-danger" data-href="?page=clients&action=getClientToDelete&id=<?=$clien['id']?>">Eliminar</a></td>
+                    </tr>
+                <?php endforeach;?>
+                </tbody>
+            </table>
             <!-- <a href="" class="btn btn-primary" id="productstofinish">Ver mas productos por terminar</a> -->
         </div>
 
@@ -37,7 +58,7 @@
                     </div>
                     <div class="modal-footer">
                         <a type="button" class="btn btn-secondary" data-bs-dismiss="modal">No quiero :C</a>
-                        <a id="senData" href="" type="button" class="btn btn-primary" data="deleteProduct">Si, Eliminar >:|</a>
+                        <a id="sendClient" href="" type="button" class="btn btn-primary" data="deleteClient">Si, Eliminar >:|</a>
                     </div>
                 </div>
             </div>
