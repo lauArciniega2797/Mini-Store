@@ -1,8 +1,6 @@
 <?php
 require_once 'includes/header.php';
 ?>
-
-<body>
     <section class="container">
         <h2 style="margin-bottom:30px;">Nuevo Producto</h2>
         <hr>

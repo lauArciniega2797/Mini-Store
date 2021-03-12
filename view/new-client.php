@@ -1,7 +1,6 @@
 <?php
 require_once 'includes/header.php';
 ?>
-<body>
     <section class="container">
         <h2 style="margin-bottom:30px;">Nuevo Cliente</h2>
         <hr>
@@ -51,7 +50,7 @@ require_once 'includes/header.php';
                         <!-- <label for="" id="error-message"></label> -->
                     </div>
                     <div class="form-group row">
-                        <label for="inputQuantity" class="col-md-12 col-form-label">Limite de cerdito:</label>
+                        <label for="inputQuantity" class="col-md-12 col-form-label">Limite de crédito:</label>
                         <div class="col-md-12">
                             <input type="text" name="credit_limit" value="<?=isset($client['credit_limit']) && !empty($client['credit_limit']) ? $client['credit_limit'] : '';?>" class="form-control" id="inputCreditLimit" placeholder="Limite de crédito" autocomplete="off" disabled>
                         </div>

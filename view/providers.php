@@ -1,10 +1,10 @@
 <?php
-// var_dump($clienos);
+// var_dump($providers);
   require_once 'includes/header.php';
 ?>
 <section id="main">
     <article>
-        <h1>Tus clientes</h1>
+        <h1>Tus proveedores</h1>
     </article>
     <article id="products">
         <div class="carousel-productos">
@@ -12,30 +12,34 @@
                 <thead>
                     <tr>
                         <th>No.</th>
-                        <th>Nombre</th>
-                        <th>E-mail</th>
+                        <th>RFC</th>
+                        <th>Nombre comercial</th>
+                        <th>Tipo</th>
                         <th>Teléfono</th>
-                        <th>Crédito aprobado</th>
-                        <th>Limite de crédito</th>
-                        <th>Días de crédito</th>
-                        <th>Referencia bancaria</th>
+                        <th>Calle</th>
+                        <th>Colonia</th>
+                        <th>Numero Exterior</th>
+                        <th>Código Postal</th>
+                        <th>Etiqueta</th>
                         <th>Acciones</th>
                     </tr>
                 </thead>
                 <tbody>
-                <?php foreach ($client as $clien): ?>
+                <?php foreach ($providers as $prov): ?>
                     <tr>
-                        <td><?=$clien['id']?></td>
-                        <td><?=$clien['name']?></td>
-                        <td><?=$clien['email']?></td>
-                        <td><?=$clien['phone']?></td>
-                        <td><?=$clien['approved_credit']?></td>
-                        <td><?=$clien['credit_limit']?></td>
-                        <td><?=$clien['credit_days']?></td>
-                        <td><?=$clien['bank_reference']?></td>
-                        <td><a href="?page=clients&action=newClient&parameter=<?=$clien['id']?>" class="btn btn-primary">Editar</a>
+                        <td><?=$prov['id']?></td>
+                        <td><?=$prov['RFC']?></td>
+                        <td><?=$prov['comercial_name']?></td>
+                        <td><?=$prov['type']?></td>
+                        <td><?=$prov['phone']?></td>
+                        <td><?=$prov['street']?></td>
+                        <td><?=$prov['suburb']?></td>
+                        <td><?=$prov['number']?></td>
+                        <td><?=$prov['postal_code']?></td>
+                        <td><?=$prov['tag']?></td>
+                        <td><a href="?page=providers&action=newProvider&parameter=<?=$prov['id']?>" class="btn btn-primary">Editar</a>
                     <!-- Button trigger modal -->
-                    <a type="button" data-bs-toggle="modal" data-bs-target="#deleteModal" class="deleteProductData btn btn-danger" data-href="?page=clients&action=getClientToDelete&id=<?=$clien['id']?>">Eliminar</a></td>
+                    <a type="button" data-bs-toggle="modal" data-bs-target="#deleteModal" class="deleteProductData btn btn-danger" data-href="?page=providers&action=getProviderToDelete&id=<?=$prov['id']?>">Eliminar</a></td>
                     </tr>
                 <?php endforeach;?>
                 </tbody>
@@ -48,7 +52,7 @@
             <div class="modal-dialog">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title" id="exampleModalLabel">¿Segura deseas eliminar este cliente?</h5>
+                        <h5 class="modal-title" id="exampleModalLabel">¿Segura deseas eliminar este proveedor?</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
@@ -58,7 +62,7 @@
                     </div>
                     <div class="modal-footer">
                         <a type="button" class="btn btn-secondary" data-bs-dismiss="modal">No quiero :C</a>
-                        <a id="sendClient" href="" type="button" class="btn btn-primary" data="deleteClient">Si, Eliminar >:|</a>
+                        <a id="sendProvider" href="" type="button" class="btn btn-primary" data="deleteProvider">Si, Eliminar >:|</a>
                     </div>
                 </div>
             </div>

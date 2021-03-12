@@ -225,7 +225,6 @@ class clients {
         }
         require_once 'view/new-client.php';
     }
-    // http://localhost/Mini-Store/?page=clients&action=saveClient&function=undefined&id=undefined
     public function saveClient(){
         if($_POST){
             var_dump($_POST);
@@ -263,6 +262,7 @@ class clients {
                         $query = 'INSERT INTO clients VALUES(null,"'.$name.'","'.$email.'",'.$phone.',1,null,null,'.$bank_reference.')';
                         // $query = 'INSERT INTO clients VALUES(null,'$name','$email','$phone',null,null,null,'$bank_reference')';
                     }
+                    var_dump($query);
                     include 'conexion.php'; //si la pongo por fuera, no funciona :(
                     $query_prepare = $con->prepare($query);
                     if($query_prepare->execute()){
@@ -337,6 +337,184 @@ class clients {
         // var_dump($row);
         
         echo json_encode($row);
+    }
+}
+
+class providers {
+    public function index(){
+        $providers = $this->getProviders();
+        require_once 'view/providers.php';
+    }
+    public function newProvider(){
+        $id="";$provider="";$action="";
+        if (isset($_GET['parameter']) && !empty($_GET['parameter'])) {
+            $providers = $this->getProviderToEdit($_GET['parameter']);
+            $action = 'editProvider';
+        }
+        require_once 'view/new-provider.php';
+    }
+    public function saveProvider(){
+        if($_POST){
+            var_dump($_POST);
+            $function = "";$id="";
+            if(isset($_GET['function']) && !empty($_GET['function'])){
+                $function = $_GET['function'];
+            }
+            if(isset($_GET['id']) && !empty($_GET['id'])){
+                $id =  $_GET['id'];
+            }
+            if (isset($_POST['function']) && !empty($_POST['function'])) {
+                $function = $_POST['function'];
+            }
+            if (isset($_POST['id']) && !empty($_POST['id'])) {
+                $id = $_POST['id'];
+            }
+            var_dump($id);
+            var_dump($function);
+            switch ($function) {
+                case 'newProvider':
+                    $rfc = $_POST['rfc'];
+                    $comercial_name = $_POST['comercial_name'];
+                    $type = $_POST['type'];
+                    $phone = $_POST['phone'];
+                    $street = $_POST['street'];
+                    $suburb = $_POST['suburb'];
+                    $number = $_POST['number'];
+                    $postal_code = $_POST['postal_code'];
+                    $tag = $_POST['tag'];
+                    // "INSERT INTO providers VALUES('sdfsdfasdf6as54d6fa464','Chavita','Dulceria',,'','',,,'Pesimo jefe')"
+                    $query="INSERT INTO providers VALUES(null,'$rfc','$comercial_name','$type',$phone,'$street','$suburb',$number,$postal_code,'$tag')";
+                    var_dump($query);
+                    include 'conexion.php'; //si la pongo por fuera, no funciona :(
+                    $query_prepare = $con->prepare($query);
+                    if($query_prepare->execute()){
+                        echo 'done';
+                    }
+                    break;
+                case 'editProvider':
+                    $rfc = $_POST['rfc'];
+                    $comercial_name = $_POST['comercial_name'];
+                    $type = $_POST['type'];
+                    $phone = $_POST['phone'];
+                    $street = $_POST['street'];
+                    $suburb = $_POST['suburb'];
+                    $number = $_POST['number'];
+                    $postal_code = $_POST['postal_code'];
+                    $tag = $_POST['tag'];
+                    // $query="INSERT INTO providers VALUES(null,'$rfc','$comercial_name','$type',$phone,'$street','$suburb',$number,$postal_code,'$tag')";
+                    $query="UPDATE providers SET RFC='$rfc',comercial_name='$comercial_name',type='$type',phone=$phone,street='$street',suburb='$suburb',number=$number,postal_code=$postal_code,tag='$tag' WHERE id = $id";
+                    var_dump($query);
+                    include 'conexion.php'; //si la pongo por fuera, no funciona :(
+                    $query_prepare = $con->prepare($query);
+                    if($query_prepare->execute()){
+                        echo 'done';
+                    }
+                    break;
+                case 'deleteProvider':
+                    $query = "DELETE FROM providers WHERE id = $id";
+                    include 'conexion.php'; //si la pongo por fuera, no funciona :(
+                    $query_prepare = $con->prepare($query);
+                    if($query_prepare->execute()){
+                        echo 'done';
+                    }
+                    break;
+            }
+        }
+    }
+    public function getProviders(){
+        $query = "SELECT * FROM providers ORDER BY id";
+        include 'conexion.php';
+        $query_prepare = $con->prepare($query);
+        $query_prepare->execute();
+        $row = $query_prepare->fetchAll(PDO::FETCH_ASSOC);
+        return $row;
+    }
+    public function getProviderToEdit($id) {
+        $query = "SELECT * FROM providers where id=$id";
+        include 'conexion.php';
+        $query_prepare = $con->prepare($query);
+        $query_prepare->execute();
+        $row = $query_prepare->fetchAll(PDO::FETCH_ASSOC);
+        foreach ($row as $provider) {
+            return $provider;
+        }
+    }
+    public function getProviderToDelete(){
+        $id="";
+        if (isset($_GET['id']) && !empty($_GET['id'])) {
+            $id = $_GET['id'];
+        }
+        $query = "SELECT id, comercial_name FROM providers where id = $id";
+        var_dump($query);
+        include 'conexion.php';
+        $query_prepare = $con->prepare($query);
+        $query_prepare->execute();
+        $row = $query_prepare->fetchAll(PDO::FETCH_ASSOC);
+        // var_dump($row);
+        
+        echo json_encode($row);
+    }
+}
+
+class sales {
+    public function index(){
+        require_once 'view/sales.php';
+    }
+    public function newSale(){
+        $client = new clients(); //instancia de los objetos
+        $product = new products();
+        
+        $clients = $client->getClients(); //traer todos los productos y clientes
+        $products = $product->getProducts();
+        require_once 'view/new-sale.php';
+    }
+    public function getDataSelectedClient() {
+        $id="";
+        if (isset($_POST['id']) && !empty($_POST['id'])) {
+            $id = $_POST['id'];
+        }
+        include 'conexion.php';
+        $query_prepare = $con->prepare("SELECT approved_credit, credit_limit, credit_days FROM clients WHERE id = $id");
+        $query_prepare->execute();
+        $client = $query_prepare->fetchAll(PDO::FETCH_ASSOC);
+        echo json_encode($client);
+    }
+    public function getDataSelectedProduct() {
+        $id="";
+        if (isset($_POST['id']) && !empty($_POST['id'])) {
+            $id = $_POST['id'];
+        }
+        include 'conexion.php';
+        $query_prepare = $con->prepare("SELECT * FROM clients WHERE id = $id");
+        $query_prepare->execute();
+        $product = $query_prepare->fetchAll(PDO::FETCH_ASSOC);
+        echo json_encode($product);
+    }
+    // public $array_product = array();
+    public function addProductToCar(){
+        $id="";$cant="";$disponible="";
+        
+        if ((isset($_POST['id']) && !empty($_POST['id'])) && (isset($_POST['cantidad']) && !empty($_POST['cantidad']))) {
+            $id = $_POST['id'];
+            $cant = $_POST['cantidad'];
+        }
+        include 'conexion.php';
+        $query_prepare = $con->prepare("SELECT id, name, store_price, quantity, status FROM products WHERE id = $id");
+        $query_prepare->execute();
+        $product = $query_prepare->fetchAll(PDO::FETCH_ASSOC);
+        foreach ($product as $value) {
+            $total_product =$value['store_price'] * $cant;
+            $newdata =  array (
+                'id' => $value['id'],
+                'Producto' => $value['name'],
+                'Precio' => (int)$value['store_price'],
+                'Cantidad' => (int)$cant,
+                'Disponibles' => (int)$value['quantity'],
+                'Total' => $total_product
+            );
+        }
+        echo json_encode($newdata);
+        // return $array_product;
     }
 }
 ?>

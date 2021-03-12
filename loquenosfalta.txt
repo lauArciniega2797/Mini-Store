@@ -1,26 +1,20 @@
-• Seccion de ventas
- - historial de ventas (filtro por mes, año, semana, quincena)
- - nueva venta
- - REGISTRO: folio, cliente, total
- - Si es deuda pues a deudores.
- - Si es credito se va descontando.
-
 • Seccion de productos
  - Nuevo producto *------- DONE ---------*
- - Editar y eliminar (Solo falta eliminar)
+ - Editar y eliminar *------- DONE ---------*
  - Todos los productos *------- DONE ---------*
- - Filtros en todos los productos
-
-• Seccion Categorias
- - Nueva
- - Editar y eliminar
- - Seccion en formulario de productos
+ - Filtrar productos
 
 • Clientes
- - Nuevo
- - Editar o eliminar
- - Deuda o descuento del credito.
- - REGISTRO: nombre, credito
+ - Nuevo *------- DONE ---------*
+ - Editar o eliminar *------- DONE ---------*
+ - Deuda o descuento del credito. *------- DONE ---------*
+ - filtrar ventas
+
+• Seccion de ventas
+ - nueva venta
+ - historial de ventas (filtro por mes, año, semana, quincena)
+ - Si es deuda pues a deudores.
+ - Si es credito se va descontando.
 
 • DEUDORES (Automatico)
  - Nombre cliente, total de la deuda, folio venta, accion:pagado.
@@ -30,15 +24,12 @@
 • Seccion de pagos ( clientes que finalizaron sus deudas) (automatico)
  - Reporte de los pagos realizados de los clientes
  - Cliente, deuda, folio venta, fecha
-Se ha re
+
 • UI
  - Validaciones
  - diseño a las paginas
  - avisos en productos (no hay productos, no hay productos por agotarse)
  - en el navegador chrome, actualiza el formulario sin pedirlo.
-
-• Proveedores
-
 
 • ADMIN o USUARIO
  - admin, puede eliminar, editar y agregar productos, proveedores, clientes, deudores, pagos, ventas, login

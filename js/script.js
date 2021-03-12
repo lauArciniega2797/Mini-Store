@@ -106,7 +106,7 @@ $('#senData').on('click', function(e){
     }
 })
 $('.deleteProductData').on('click', function(e){
-    e.preventDefault();
+    // e.preventDefault();
     $.ajax({
         url:$(e.target).attr('data-href'),
         type:'POST',
@@ -116,6 +116,7 @@ $('.deleteProductData').on('click', function(e){
             $.each(response, function (indice,valor) {
                 $('.modal-footer').find('a#senData').prop('href',valor.id);
                 $('.modal-footer').find('a#sendClient').prop('href',valor.id);
+                $('.modal-footer').find('a#sendProvider').prop('href',valor.id);
                 // $('.modal-footer').find('#senData').attr('data-id',valor.id);
                 $('#imageProductDelet').attr('src', 'images/'+valor.image);
                 $('#imageProductDelet').attr('alt', 'Eunicodin'+valor.name);
@@ -124,7 +125,6 @@ $('.deleteProductData').on('click', function(e){
         }
     })
 })
-
 /* ---------- INSERT CLIENT ON DATABASE ----------  */
 $('#sendClient').on('click', function(e) {
     e.preventDefault();
@@ -158,7 +158,7 @@ $('#sendClient').on('click', function(e) {
             success:function(response){
                 console.log(response);
                 if (response) {
-                    $('#successDataModal').html('Se ha eliminado el producto');
+                    $('#successDataModal').html('Se ha eliminado el cliente');
                     $('#successDataModal').css({'display':'block'});
                     // return false;
                 }
@@ -184,10 +184,149 @@ $("#flexCheckDefault").on('change', function() {
         $("#flexCheckDefault").attr('value', '1');
     }
 });
+/* ---------- INSERT PROVIDER ON DATABASE ----------  */
+$('#senDataProvider').on('click', function(e) {
+    e.preventDefault();
+    var actionForm = $(this).attr('data');
+    var dataID = $(this).attr('data-id');
 
-// FUNCIONES PARA PRODUCTOS
+    console.log($(this));
+    console.log($(this).attr('data'));
 
+    console.log('?page=providers&action=saveProvider&function='+actionForm+'&id='+dataID);
+    if (actionForm != 'deleteProvider') {
+        $.ajax({
+            url:'?page=providers&action=saveProvider&function='+actionForm+'&id='+dataID,
+            data:$('#newProviderForm').serialize(),
+            type:'POST',
+            success:(response)=>{
+                console.log(response);
+            }
+        })
+    } else {
+        console.log(actionForm);
+        console.log($(this));
+        console.log($(this).attr('href'));
+        $.ajax({
+            url:'?page=providers&action=saveProvider',
+            data: {
+                'function': actionForm,
+                'id': $(this).attr('href')
+            },
+            type:'POST',
+            success:function(response){
+                console.log(response);
+                if (response) {
+                    $('#successDataModal').html('Se ha eliminado el proveedor');
+                    $('#successDataModal').css({'display':'block'});
+                    // return false;
+                }
+                setTimeout(() => {
+                    $('#successDataModal').css({'display':'none'})
+                    $('.btn-close').trigger('click');
+                    location.reload();
+                }, 3000);
+            }
+        });
+    }
+})
+/* ---------- FUNCIONES PARA VENTAS ----------  */
+$('#selectClient').on('change', function(e){
+    var idClient = $("#selectClient option:selected").attr('value');
+    $.ajax({
+        url:'?page=sales&action=getDataSelectedClient',
+        type:'POST',
+        dataType:'json',
+        data:{id:idClient},
+        success:(response) => {
+            $.each(response, function (indice,valor) {
+                console.log(indice, valor.approved_credit);
+                if (valor.approved_credit == 0) {
+                    $('#approved_credit').html('Aprobado');
+                    $('#credit_limit').html(valor.credit_limit);
+                    $('#credit_days').html(valor.credit_days);
+                } else {
+                    $('#approved_credit').html('No aprobado');
+                    $('#credit_limit').html('$00.00');
+                    $('#credit_days').html('0');
+                }
+            })
+        }
+    })
+})
 
+var array_product = [], filter_array = [];
+$('.addProduct').on('click', function(e){
+    e.preventDefault();
+    var idProduct = $("#selectProduct option:selected").attr('value');
+    var cant = $('#inputCantidadProduct').val();
+
+    $.ajax({
+        url:'?page=sales&action=addProductToCar',
+        type:'POST',
+        dataType:'json',
+        data:{id:idProduct, cantidad:cant},
+        success:(response) => {
+            //FILTRO #1
+            filter_array.push(response);
+            let errorMessage = false;
+            /*for (let i = 0; i < filter_array.length; i++) { //-------------NO BORRAR!!!! este es como el de abajo pero sin el forEach. A la antigua :v
+                if (array_product.length <= 0) {
+                    array_product.push(filter_array[i]);
+                } else {
+                    // let indexOf = array_product.findIndex((product) => product.id === filter_array[i].id); // (product) es el parametro que le estoy pasando a FindIndex. El parametro es el array_product
+                    let indexOf;
+                    for (let j = 0; j < array_product.length; j++) {
+                        if (array_product[j].id === filter_array[i].id) {
+                            indexOf = j;
+                            break;
+                        }
+                    }
+                    if (indexOf > -1){
+                        array_product[indexOf].Cantidad += filter_array[i].Cantidad;
+                        array_product[indexOf].Total = array_product[indexOf].Cantidad * array_product[indexOf].Precio;
+                    } else {
+                        array_product.push(filter_array[i]);
+                    }
+                }
+            }*/
+            filter_array.forEach(mov => {
+                if (array_product.length <= 0) {
+                    mov.Cantidad <= mov.Disponibles ? array_product.push(mov) : errorMessage = true;
+                } else {
+                    let productIndex = array_product.findIndex(product => product.id === mov.id);
+                    if (productIndex > -1) {
+                        array_product[productIndex].Cantidad + mov.Cantidad <= array_product[productIndex].Disponibles ? array_product[productIndex].Cantidad += mov.Cantidad : errorMessage = true;
+                        array_product[productIndex].Total = array_product[productIndex].Cantidad * array_product[productIndex].Precio;
+                    } else {
+                        mov.Cantidad <= mov.Disponibles ? array_product.push(mov) : errorMessage = true;
+                    }
+                }
+            });
+            if (errorMessage) {
+                errorMessage = "No se puede agregar el producto, la cantidad de productos es mayor a la cantidad en stock.";
+                alert(errorMessage);
+            }
+            filter_array = [];
+            let string = ''; $('#CarProduct').html("");
+            array_product.forEach((product,index) => {
+                string+="<tr><td>"+(index+1)+"</td><td>"+product.Producto+"</td><td>"+product.Precio+"</td><td><input type='number' value='"+product.Cantidad+"' onchange='editCantCar()'></td><td>"+product.Disponibles+"</td><td>"+product.Total+"</td><td><a class='btn btn-danger addProduct' onclick='deleteFromCar("+index+")'>Eliminar</a></td></tr>";
+                $('#CarProduct').html(string);
+            })
+        }
+    })
+})
+
+function deleteFromCar(id){
+    console.log(id);
+    array_product.splice(id,1);
+    let string = ''; $('#CarProduct').html("");
+    array_product.forEach((product,index) => {
+        string+="<tr><td>"+(index+1)+"</td><td>"+product.Producto+"</td><td>"+product.Precio+"</td><td>"+product.Cantidad+"</td><td>"+product.Disponibles+"</td><td>"+product.Total+"</td><td><a class='btn btn-danger addProduct' onclick='deleteFromCar("+index+")'>Eliminar</a></td></tr>";
+        $('#CarProduct').html(string);
+    })
+    console.log(array_product);
+}
 function validateLogin(){
     var valueUser = document.getElementById('username').value,
         valuePass = document.getElementById('password').value;

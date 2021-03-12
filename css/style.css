@@ -250,3 +250,6 @@ form .box-image:hover::after{
   position: absolute;
 }
 form #file{display: none;}
+table thead th {
+    padding: 10px 0;
+}
