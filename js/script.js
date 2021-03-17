@@ -8,11 +8,9 @@ $(document).ready(function(){
     $.ajax({
         url:'?page=sales&action=showSales',
         success:(response)=>{
-            console.log(response);
             $('#table_sales').html(response);
         }
-    })
-
+    });
     getDataClient();
     changePayMethod();
 });
@@ -250,7 +248,7 @@ $('#payMethod').on('change', function(){
     changePayMethod();
 })
 // agregar productos a la tabla de la venta(Validado)
-var array_product = [], filter_array = [];
+filter_array = [];
 $('.addProduct').on('click', function(e){
     e.preventDefault();
     var idProduct = $("#selectProduct option:selected").attr('value');
@@ -263,6 +261,7 @@ $('.addProduct').on('click', function(e){
         data:{id:idProduct, cantidad:cant},
         success:(response) => {
             //FILTRO #1
+            console.log(response);
             filter_array.push(response);
             let errorMessage = false;
             /*for (let i = 0; i < filter_array.length; i++) { //-------------NO BORRAR!!!! este es como el de abajo pero sin el forEach. A la antigua :v
@@ -449,7 +448,9 @@ function CalcTotal(){
     // }
     totalDesc = descuentoCredit > 0 ? descuentoCredit : 0;
     total = finalTotal < 0 ? 0 : finalTotal;
-    $('#DescCredit').html(totalDesc);
+    if ($('#title').html() != 'Editar Venta') {
+        $('#DescCredit').html(totalDesc);
+    }
     $('#total').html(total);
 }
 /* ---------- FUNCIONES PARA LOGIN ----------  */

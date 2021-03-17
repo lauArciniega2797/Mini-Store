@@ -256,10 +256,10 @@ class clients {
                         $credit_limit = $_POST['credit_limit'];
                         $credit_days = $_POST['credit_days'];
                         // INSERT INTO clients VALUES(null,'margarita','example@example.com',15467984,0,200,2,1234567890)
-                        $query = 'INSERT INTO clients VALUES(null,"'.$name.'","'.$email.'",'.$phone.','.$_POST['checkCredit'].','.$credit_limit.','.$credit_days.','.$bank_reference.')';
+                        $query = 'INSERT INTO clients VALUES(null,"'.$name.'","'.$email.'",'.$phone.','.$_POST['checkCredit'].','.$credit_limit.','.$credit_days.',"'.$bank_reference.'")';
                     } else{
                         echo "Checkbox no seleccionado";
-                        $query = 'INSERT INTO clients VALUES(null,"'.$name.'","'.$email.'",'.$phone.',1,null,null,'.$bank_reference.')';
+                        $query = 'INSERT INTO clients VALUES(null,"'.$name.'","'.$email.'",'.$phone.',1,null,null,"'.$bank_reference.'")';
                         // $query = 'INSERT INTO clients VALUES(null,'$name','$email','$phone',null,null,null,'$bank_reference')';
                     }
                     var_dump($query);
