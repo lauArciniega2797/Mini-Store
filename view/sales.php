@@ -1,10 +1,7 @@
-<?php
-// var_dump($clienos);
-  require_once 'includes/header.php';
-?>
+<?php require_once 'includes/header.php';?>
 <section id="main">
     <article>
-        <h1>Tus clientes</h1>
+        <h1>Tus ventas</h1>
     </article>
     <article id="products">
         <div class="carousel-productos">
@@ -12,33 +9,16 @@
                 <thead>
                     <tr>
                         <th>No.</th>
-                        <th>Nombre</th>
-                        <th>E-mail</th>
-                        <th>Teléfono</th>
-                        <th>Crédito aprobado</th>
-                        <th>Limite de crédito</th>
-                        <th>Días de crédito</th>
-                        <th>Referencia bancaria</th>
+                        <th>Folio</th>
+                        <th>Cliente</th>
+                        <th>Productos</th>
+                        <th>Status</th>
+                        <th>Total</th>
+                        <th>Fecha de creción</th>
                         <th>Acciones</th>
                     </tr>
                 </thead>
-                <tbody>
-                <?php foreach ($client as $clien): ?>
-                    <tr>
-                        <td><?=$clien['id']?></td>
-                        <td><?=$clien['name']?></td>
-                        <td><?=$clien['email']?></td>
-                        <td><?=$clien['phone']?></td>
-                        <td><?=$clien['approved_credit']?></td>
-                        <td><?=$clien['credit_limit']?></td>
-                        <td><?=$clien['credit_days']?></td>
-                        <td><?=$clien['bank_reference']?></td>
-                        <td><a href="?page=clients&action=newClient&parameter=<?=$clien['id']?>" class="btn btn-primary">Editar</a>
-                    <!-- Button trigger modal -->
-                    <a type="button" data-bs-toggle="modal" data-bs-target="#deleteModal" class="deleteProductData btn btn-danger" data-href="?page=clients&action=getClientToDelete&id=<?=$clien['id']?>">Eliminar</a></td>
-                    </tr>
-                <?php endforeach;?>
-                </tbody>
+                <tbody id="table_sales"></tbody>
             </table>
             <!-- <a href="" class="btn btn-primary" id="productstofinish">Ver mas productos por terminar</a> -->
         </div>

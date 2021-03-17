@@ -253,3 +253,18 @@ form #file{display: none;}
 table thead th {
     padding: 10px 0;
 }
+
+
+.table-expandible {
+    height: 0;
+    overflow: hidden;
+    transition: all .4s;
+}
+.table-expandible.visibleTr{
+    height: auto;
+    overflow: visible;
+}
+tr td div table {
+    width: 60%;
+    margin: 20px auto 20px auto;
+}

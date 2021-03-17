@@ -1,9 +1,20 @@
 $(document).ready(function(){
-if ($('#flexCheckDefault').is(':checked')) {
-    $('#inputCreditLimit').removeAttr('disabled');
-    $('#inputCreditDays').removeAttr('disabled');
-    $("#flexCheckDefault").attr('value', '0');
-}
+    if ($('#flexCheckDefault').is(':checked')) {
+        $('#inputCreditLimit').removeAttr('disabled');
+        $('#inputCreditDays').removeAttr('disabled');
+        $("#flexCheckDefault").attr('value', '0');
+    }
+
+    $.ajax({
+        url:'?page=sales&action=showSales',
+        success:(response)=>{
+            console.log(response);
+            $('#table_sales').html(response);
+        }
+    })
+
+    getDataClient();
+    changePayMethod();
 });
 var body = document.body, html = document.documentElement;
 var total_height = Math.max(body.scrollHeight, body.offsetHeight, html.clientHeight, html.scrollHeight, html.offsetHeight);
@@ -230,31 +241,15 @@ $('#senDataProvider').on('click', function(e) {
         });
     }
 })
+
 /* ---------- FUNCIONES PARA VENTAS ----------  */
 $('#selectClient').on('change', function(e){
-    var idClient = $("#selectClient option:selected").attr('value');
-    $.ajax({
-        url:'?page=sales&action=getDataSelectedClient',
-        type:'POST',
-        dataType:'json',
-        data:{id:idClient},
-        success:(response) => {
-            $.each(response, function (indice,valor) {
-                console.log(indice, valor.approved_credit);
-                if (valor.approved_credit == 0) {
-                    $('#approved_credit').html('Aprobado');
-                    $('#credit_limit').html(valor.credit_limit);
-                    $('#credit_days').html(valor.credit_days);
-                } else {
-                    $('#approved_credit').html('No aprobado');
-                    $('#credit_limit').html('$00.00');
-                    $('#credit_days').html('0');
-                }
-            })
-        }
-    })
+    getDataClient();
 })
-
+$('#payMethod').on('change', function(){
+    changePayMethod();
+})
+// agregar productos a la tabla de la venta(Validado)
 var array_product = [], filter_array = [];
 $('.addProduct').on('click', function(e){
     e.preventDefault();
@@ -308,25 +303,156 @@ $('.addProduct').on('click', function(e){
                 alert(errorMessage);
             }
             filter_array = [];
-            let string = ''; $('#CarProduct').html("");
+            let string = '', total = 0; $('#CarProduct').html("");
             array_product.forEach((product,index) => {
-                string+="<tr><td>"+(index+1)+"</td><td>"+product.Producto+"</td><td>"+product.Precio+"</td><td><input type='number' value='"+product.Cantidad+"' onchange='editCantCar()'></td><td>"+product.Disponibles+"</td><td>"+product.Total+"</td><td><a class='btn btn-danger addProduct' onclick='deleteFromCar("+index+")'>Eliminar</a></td></tr>";
+                string+="<tr><td>"+(index+1)+"</td><td>"+product.Producto+"</td><td>"+product.Precio+"</td><td><input type='number' class='editCant' value='"+product.Cantidad+"' min='1' max='"+product.Disponibles+"' data-id='"+product.id+"'></td><td>"+product.Disponibles+"</td><td>"+product.Total+"</td><td><a class='btn btn-danger addProduct' onclick='deleteFromCar("+index+","+product.Total+")'>Eliminar</a></td></tr>";
+                total += product.Total;
                 $('#CarProduct').html(string);
             })
+            $('#subtotal').html(total)
+            CalcTotal();
         }
     })
 })
-
-function deleteFromCar(id){
-    console.log(id);
-    array_product.splice(id,1);
-    let string = ''; $('#CarProduct').html("");
+// Detecta cual producto se le esta cambiando la cantidad
+$(document).on('change','.editCant', function(e){
+    let limit = $(e.target).attr('max');
+    let id = $(e.target).attr('data-id');
+    if (parseInt($(e.target).val()) > parseInt(limit)){
+        alert('no hay suficientes productos en stock');
+        $(e.target).val(limit);
+    }
+    array_product.forEach(product =>{
+        if (product.id == id) {
+            product.Cantidad = parseInt($(e.target).val());
+            product.Total = product.Cantidad * product.Precio;
+        }
+    })
+    let string = '', total=0; $('#CarProduct').html("");
     array_product.forEach((product,index) => {
-        string+="<tr><td>"+(index+1)+"</td><td>"+product.Producto+"</td><td>"+product.Precio+"</td><td>"+product.Cantidad+"</td><td>"+product.Disponibles+"</td><td>"+product.Total+"</td><td><a class='btn btn-danger addProduct' onclick='deleteFromCar("+index+")'>Eliminar</a></td></tr>";
+        string+="<tr><td>"+(index+1)+"</td><td>"+product.Producto+"</td><td>"+product.Precio+"</td><td><input type='number' class='editCant' value='"+product.Cantidad+"' min='1' max='"+product.Disponibles+"' data-id='"+product.id+"'></td><td>"+product.Disponibles+"</td><td>"+product.Total+"</td><td><a class='btn btn-danger addProduct' onclick='deleteFromCar("+index+")'>Eliminar</a></td></tr>";
+        total += product.Total;
         $('#CarProduct').html(string);
     })
-    console.log(array_product);
+    $('#subtotal').html(total);
+    CalcTotal();
+})
+/*
+    Al enviar la venta, se tiene que hacer por cada producto.
+    • En cliente se debe actulizar el credito nuevo (esto se debe hacer una sola vez. LA venta solo tiene un cliente)
+    • En producto se debe reducir el stock (por cada producto en array producto se debe reducir el stock)
+    • Se debe enviar el id del cliente, el id del producto, un folio aleatorio, el metodo de pago(pagado, fiado),fecha de la venta, el subtotal y el total
+*/
+$('#senDataSale').on('click', function(e){
+    e.preventDefault();
+    $.ajax({
+        type:'POST',
+        url:'?page=sales&action=saveSale',
+        data:{
+            folio:$('#folio').val(), // Folio de la venta
+            client:$("#selectClient option:selected").attr('value'), // cliente seleccionado
+            credit:$('#DescCredit').html(), // nuevo credito del cliente
+            status:$('#payMethod option:selected').attr('value'), // estatus de la venta
+            subtotal:$('#subtotal').html(), // Subtotal y total de la venta
+            total:$('#total').html(), // total de la venta
+            products:JSON.stringify(array_product) //array de los productos selecionados
+        },
+        success:(response)=>{
+            if (response === 'done') {
+                if (response) {
+                    $('#successData').html('los datos se subieron correctamente');
+                    // $('#successData').html('Los datos se guardaron correctamente');
+                    $('#successData').css({'display':'block'});
+                }
+                setTimeout(() => {
+                    $('select').val('Selecciona...');
+                    array_product = [];
+                    $('#CarProduct').html('');
+                    $('span').html('');
+                    $('#folio').val('000'+ (parseInt($('#folio').val()) + 1));
+                    window.location.href = '?page=sales&action=';
+                }, 2000);
+            }
+        }
+    })
+
+    
+})
+$(document).on('click','.expand', function(e){
+    $('#'+$(e.target).attr('data-sale')).toggleClass('visibleTr');
+})
+// Al seleccionar un metodo de pago
+function changePayMethod(){
+    if($('#payMethod').val() == 'credito') {
+        $('#credit').html($('#credit_limit').html());
+    } else {
+        $('#credit').html('0');
+    }
+    CalcTotal();
 }
+// Al seleccionar un cliente, los datos del credito aparecen en los campos
+function getDataClient(){
+    var idClient = $("#selectClient option:selected").attr('value');
+    if (idClient != undefined) {
+        $.ajax({
+            url:'?page=sales&action=getDataSelectedClient',
+            type:'POST',
+            dataType:'json',
+            data:{id:idClient},
+            success:(response) => {
+                $.each(response, function (indice,valor) {
+                    if (valor.approved_credit == 0) {
+                        $('#approved_credit').html('Aprobado');
+                        $('#credit_limit').html(valor.credit_limit);
+                        $('#credit_days').html(valor.credit_days);
+                        if ($('#payMethod option:selected').val() == 'credito') {
+                            $('#credit').html(valor.credit_limit);
+                        } else {
+                            $('#credit').html('0');
+                        }
+                    } else {
+                        $('#approved_credit').html('No aprobado');
+                        $('#credit_limit').html('$00.00');
+                        $('#credit_days').html('0');
+                        $('#credit').html('0');
+                    }
+                })
+                CalcTotal();
+            }
+        })
+    } else {
+        $('#approved_credit').html('');
+        $('#credit_limit').html('');
+        $('#credit_days').html('');
+        $('#credit').html('0');
+        CalcTotal();
+    }
+}
+// Elimina el producto de la tabla de venta
+function deleteFromCar(id){
+    array_product.splice(id,1);
+    let string = '', total_price = 0; $('#CarProduct').html("");
+    array_product.forEach((product,index) => {
+        string+="<tr><td>"+(index+1)+"</td><td>"+product.Producto+"</td><td>"+product.Precio+"</td><td><input type='number' class='editCant' value='"+product.Cantidad+"' min='1' max='"+product.Disponibles+"' data-id='"+product.id+"'></td><td>"+product.Disponibles+"</td><td>"+product.Total+"</td><td><a class='btn btn-danger addProduct' onclick='deleteFromCar("+index+","+product.Total+")'>Eliminar</a></td></tr>";
+        total_price += product.Total;
+        $('#CarProduct').html(string);
+    })
+    $('#subtotal').html(total_price)
+    CalcTotal();
+}
+function CalcTotal(){
+    let subtotal = parseInt($('#subtotal').html());
+    let credit = parseInt($('#credit').html());
+    let descuentoCredit = credit - subtotal, finalTotal=subtotal-credit, totalDesc = 0, total = 0;
+    // if (descuentoCredit > 0) {
+        
+    // }
+    totalDesc = descuentoCredit > 0 ? descuentoCredit : 0;
+    total = finalTotal < 0 ? 0 : finalTotal;
+    $('#DescCredit').html(totalDesc);
+    $('#total').html(total);
+}
+/* ---------- FUNCIONES PARA LOGIN ----------  */
 function validateLogin(){
     var valueUser = document.getElementById('username').value,
         valuePass = document.getElementById('password').value;

@@ -458,14 +458,28 @@ class providers {
 
 class sales {
     public function index(){
+        // $AllSales = $this->showSales();
         require_once 'view/sales.php';
     }
     public function newSale(){
+        $id="";$sale="";$action="";
+        if (isset($_GET['parameter']) && !empty($_GET['parameter'])) {
+            $sale = $this->getSaleToEdit($_GET['parameter']);
+            $action = 'editSale';
+        }
+
+        include 'conexion.php';
         $client = new clients(); //instancia de los objetos
         $product = new products();
+
+        //Folio automatico de venta
+        $query_count = $con->prepare("SELECT COUNT(*) FROM sales");
+        $query_count->execute();
         
+        $count = $query_count->fetchAll(PDO::FETCH_ASSOC); //trae el total de rows en la tabla
         $clients = $client->getClients(); //traer todos los productos y clientes
-        $products = $product->getProducts();
+        $products = $product->getProducts(); //trae todos los productos
+
         require_once 'view/new-sale.php';
     }
     public function getDataSelectedClient() {
@@ -515,6 +529,115 @@ class sales {
         }
         echo json_encode($newdata);
         // return $array_product;
+    }
+    public function saveSale(){
+        if ($_POST) {
+            include 'conexion.php';
+            $flag=false;$query="";
+            if ($_POST['status'] == 'credito') {
+                $query = "UPDATE clients SET credit_limit = ".$_POST['credit']." WHERE id = ".$_POST['client'];
+                var_dump($query);
+                $query_prepare = $con->prepare($query);
+                $query_prepare->execute();
+            }
+            $products = json_decode($_POST['products'],true); //el parametro true vuelve array al objeto json
+            var_dump($products);
+            foreach ($products as $value) {
+                var_dump("INSERT INTO sales VALUES(null,".$_POST['client'].",".$value['id'].",".$value['Cantidad'].",'".$_POST['folio']."','".$_POST['status']."',CURRENT_TIME(),".$_POST['subtotal'].",".$_POST['total'].")");
+                $query_product = $con->prepare("INSERT INTO sales VALUES(null,".$_POST['client'].",".$value['id'].",".$value['Cantidad'].",'".$_POST['folio']."','".$_POST['status']."',CURRENT_TIME(),".$_POST['subtotal'].",".$_POST['total'].")");
+                $query_product->execute();
+
+                //actualizar cantidad en stock de cada producto
+                var_dump("UPDATE products SET quantity = ".($value['Disponibles'] - $value['Cantidad'])." WHERE id = ".$value['id']."");
+                $query_product_prepare = $con->prepare("UPDATE products SET quantity = ".($value['Disponibles'] - $value['Cantidad'])." WHERE id = ".$value['id']."");
+                $query_product_prepare->execute();
+                $flag = true;
+            }
+
+            if ($flag) {
+                print_r('done');
+            }
+        }
+    }
+    public function showSales(){
+        include 'conexion.php';
+        $folio_array = [];
+        $products_array = [];
+        $query="SELECT s.id, s.folio, c.name as 'Cliente', p.name as 'Producto', s.cantidad, s.pay_method as 'Estatus', s.total, s.fecha 
+                FROM sales s
+                INNER JOIN clients c ON c.id = s.id_client
+                LEFT JOIN products p ON p.id = s.id_product";
+        
+        $query_prepare = $con->prepare($query);
+        $query_prepare->execute();
+        $sales = $query_prepare->fetchAll(PDO::FETCH_ASSOC);
+        // ["folio"]=> string(3) "123" ["Cliente"]=> string(15) "maria guadalupe" ["Producto"]=> string(16) "mini trikitrakes" ["Estatus"]=> string(5) "fiado" ["total"]=> string(2) "60" ["fecha"]=> string(19) "2021-03-13 21:08:58" 
+        // Llenar array de productos
+        // var_dump($sales);
+        foreach ($sales as $product) {
+            array_push($products_array, [$product['folio'], $product['Producto'], $product['cantidad']]);
+        }
+        // Llenar array de folios y tr
+        $index = 1;
+        foreach ($sales as $sale) {
+            if (!in_array($sale['folio'], $folio_array)){
+                array_push($folio_array, $sale['folio']);
+                echo "<tr>";
+                echo "    <td>".$index++."</td>";
+                echo "    <td>".$sale['folio']."</td>";
+                echo "    <td>".$sale['Cliente']."</td>";
+                echo "    <td><a class='expand' data-sale='".$sale['folio']."'>Expandir</a></td>";
+                echo "    <td>".$sale['Estatus']."</td>";
+                echo "    <td>".$sale['total']."</td>";
+                echo "    <td>".$sale['fecha']."</td>";
+                echo "    <td>";
+                echo "      <a href='?page=sales&action=newSale&parameter=".$sale['folio']."' class='btn btn-primary'>Editar</a>";
+                echo "      <a type='button' data-bs-toggle='modal' data-bs-target='#deleteModal' class='deleteSaleData btn btn-danger' data-href='?page=sales&action=getSaleToDelete&id=".$sale['id']."'>Eliminar</a>";
+                echo "    </td>";
+                echo "</tr>";
+                echo "<tr>";
+                echo "    <td colspan='8'>";
+                echo "        <div class='table-expandible' id='".$sale['folio']."'>";
+                echo "            <table>";
+                echo "                <thead>";
+                echo "                    <tr>";
+                echo "                        <th>Producto</th>";
+                echo "                        <th>Cantidad</th>";
+                echo "                    </tr>";
+                echo "                </thead>";
+                echo "                <tbody>";
+                foreach ($products_array as $value) {
+                    if ($value['0'] == $sale['folio']) {
+                        echo "              <tr>";
+                        echo "                  <td>".$value[1]."</td>";
+                        echo "                  <td>".$value[2]."</td>";
+                        echo "              </tr>";
+                    }
+                }
+                echo "                </tbody>";
+                echo "            </table>";
+                echo "        </div>";
+                echo "    </td>";
+                echo "</tr>";
+            }
+        }
+    }
+    public function getSaleToEdit($folio){
+        include 'conexion.php';
+        $query_prepare_product = $con->prepare("SELECT s.id_product as 'id', p.name, p.store_price, s.cantidad, p.quantity, (s.cantidad * p.store_price) as 'Total' FROM sales s INNER JOIN products p ON p.id = s.id_product WHERE s.folio = $folio");
+        $query_prepare_product->execute();
+        $products = $query_prepare_product->fetchAll(PDO::FETCH_ASSOC);
+
+        $array_productos = [];
+        foreach ($products as $index => $row){
+            array_push($array_productos, ['index'=>($index+1), 'id_product'=>$row['id'], 'nombre'=>$row['name'], 'precio'=>$row['store_price'], 'cantidad'=>$row['cantidad'], 'disponibles'=>$row['quantity'], 'total'=>$row['Total']]);
+        }
+        $query_prepare = $con->prepare("SELECT * FROM sales WHERE folio = $folio");
+        $query_prepare->execute();
+        $sale = $query_prepare->fetchAll(PDO::FETCH_ASSOC);
+        foreach ($sale as $row) {
+            return array($row, $array_productos); 
+        }
     }
 }
 ?>
