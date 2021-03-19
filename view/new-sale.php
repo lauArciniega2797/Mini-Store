@@ -1,5 +1,4 @@
 <?php include 'includes/header.php';
-var_dump($sale, $action);
 ?>
     <section class="container">
         <h2 id="title" style="margin-bottom:30px;"><?= isset($action) && !empty($action) ? 'Editar' : 'Nueva';?> Venta</h2>
@@ -36,8 +35,8 @@ var_dump($sale, $action);
                     <div class="form-group">
                         <select id="payMethod" class="form-select" aria-label="Default select example">
                             <!-- <option>Selecciona...</option> -->
-                            <option value="credito">Crédito</option>
                             <option value="contado" selected>Contado</option>
+                            <option value="credito">Crédito</option>
                             <option value="pending">Pendiente</option>
                         </select>
                     </div>
@@ -89,7 +88,7 @@ var_dump($sale, $action);
                             if (isset($sale) && !empty($sale)) {
                                 foreach ($sale[1] as $value) {
                                     echo "<script>";
-                                    echo "  array_product.push({id:".$value['id_product'].",Producto:'".$value['nombre']."', Precio:".$value['precio'].",Cantidad:".$value['cantidad'].",Disponibles:".$value['disponibles'].",Total:".$value['total']."})";
+                                    echo "  array_product.push({id:".$value['id_product'].",Producto:'".$value['nombre']."', Precio:".$value['precio'].",Cantidad:".$value['cantidad'].",Disponibles:".$value['disponibles'].",Total:".$value['total'].",Sale:".$value['sale_id']."})";
                                     echo "</script>";
                         ?>
                                 <tr>
@@ -116,26 +115,26 @@ var_dump($sale, $action);
                     <div class="row">
                         <p>RESUMEN</p>
                         <div class="col-md-3">
-                            <p>Crédito: $<b><span id="credit">0</span></b></p>
+                            <p>Crédito: $<b><span id="credit">-</span></b></p>
                         </div>
                         <div class="col-md-3">
-                            <p>Crédito Nuevo: $<b><span id="DescCredit">0</span></b></p>
+                            <p>Crédito Nuevo: $<b><span id="DescCredit">-</span></b></p>
                         </div>
                         <div class="col-md-3">
                             <p>Subtotal: $<b><span id="subtotal" data-subtotal="<?= isset($sale) && !empty($sale) ? $sale[0]['subtotal'] : '' ;?>"><?= isset($sale) && !empty($sale) ? $sale[0]['subtotal'] : '';?></span></b></p>
                         </div>
                         <div class="col-md-3">
-                            <p>Total: $<b><span id="total"></span></b></p>
+                            <p>Total: $<b><span data-total="<?= isset($sale) && !empty($sale) ? $sale[0]['total'] : '' ;?>" id="total"></span></b></p>
                         </div>
                     </div>
-                    <a id="senDataSale" href="javascript(void)" class="btn btn-primary" data-id="<?=isset($action) && !empty($action) ? $sale[0]['id_product'] : '';?>" data="<?=isset($action) && !empty($action) ? $action : 'newSale';?>">Guardar Venta</a>
+                    <a id="senDataSale" href="javascript(void)" class="btn btn-primary" data-id="<?=isset($action) && !empty($action) ? $sale[0]['id'] : '';?>" data="<?=isset($action) && !empty($action) ? $action : 'newSale';?>">Guardar Venta</a>
                     <?= isset($sale) && !empty($sale) ? "<a href='?page=sales&action=' class='btn btn-danger'>Cancelar</a>" : '';?>
                 </div>
             </div>
         </form>
     </section>
     <script>
-        // console.log($sale[1]);
+        console.log(array_product);
         if (document.getElementById("title").innerHTML == 'Editar Venta') {
             document.getElementById('selectClient').value = document.getElementById('client').getAttribute('forClient');
             document.getElementById('payMethod').value = document.getElementById('estatus').getAttribute('forClient');

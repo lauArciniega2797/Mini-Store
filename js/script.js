@@ -11,6 +11,8 @@ $(document).ready(function(){
             $('#table_sales').html(response);
         }
     });
+
+    $('#payMethod').attr('disabled',true);
     getDataClient();
     changePayMethod();
 });
@@ -241,12 +243,8 @@ $('#senDataProvider').on('click', function(e) {
 })
 
 /* ---------- FUNCIONES PARA VENTAS ----------  */
-$('#selectClient').on('change', function(e){
-    getDataClient();
-})
-$('#payMethod').on('change', function(){
-    changePayMethod();
-})
+$('#selectClient').on('change', function(){getDataClient();})
+$('#payMethod').on('change', function(){changePayMethod();})
 // agregar productos a la tabla de la venta(Validado)
 filter_array = [];
 $('.addProduct').on('click', function(e){
@@ -343,35 +341,81 @@ $(document).on('change','.editCant', function(e){
     • Se debe enviar el id del cliente, el id del producto, un folio aleatorio, el metodo de pago(pagado, fiado),fecha de la venta, el subtotal y el total
 */
 $('#senDataSale').on('click', function(e){
+    let action = $(this).attr('data');
     e.preventDefault();
-    $.ajax({
-        type:'POST',
-        url:'?page=sales&action=saveSale',
-        data:{
-            folio:$('#folio').val(), // Folio de la venta
-            client:$("#selectClient option:selected").attr('value'), // cliente seleccionado
-            credit:$('#DescCredit').html(), // nuevo credito del cliente
-            status:$('#payMethod option:selected').attr('value'), // estatus de la venta
-            subtotal:$('#subtotal').html(), // Subtotal y total de la venta
-            total:$('#total').html(), // total de la venta
-            products:JSON.stringify(array_product) //array de los productos selecionados
-        },
-        success:(response)=>{
-            if (response === 'done') {
-                $('#successData').html('los datos se subieron correctamente');
-                // $('#successData').html('Los datos se guardaron correctamente');
-                $('#successData').css({'display':'block'});
-                setTimeout(() => {
-                    $('select').val('Selecciona...');
-                    array_product = [];
-                    $('#CarProduct').html('');
-                    $('span').html('');
-                    $('#folio').val('000'+ (parseInt($('#folio').val()) + 1));
-                    window.location.href = '?page=sales&action=';
-                }, 2000);
+    if (action != 'editSale') {
+        $.ajax({
+            type:'POST',
+            url:'?page=sales&action=saveSale',
+            data:{
+                folio :$('#folio').val(), // Folio de la venta
+                client:$("#selectClient option:selected").attr('value'), // cliente seleccionado
+                credit:$('#DescCredit').html(), // nuevo credito del cliente
+                status:$('#payMethod option:selected').attr('value'), // estatus de la venta
+                subtotal:$('#subtotal').html(), // Subtotal y total de la venta
+                total:$('#total').html(), // total de la venta
+                products:JSON.stringify(array_product) //array de los productos selecionados
+            },
+            success:(response)=>{
+                if (response === 'done') {
+                    $('#successData').html('los datos se subieron correctamente');
+                    // $('#successData').html('Los datos se guardaron correctamente');
+                    $('#successData').css({'display':'block'});
+                    setTimeout(() => {
+                        $('select').val('Selecciona...');
+                        array_product = [];
+                        $('#CarProduct').html('');
+                        $('span').html('');
+                        $('#folio').val('000'+ (parseInt($('#folio').val()) + 1));
+                        window.location.href = '?page=sales&action=';
+                    }, 2000);
+                }
             }
+        })
+    } else {
+        //para el cliente
+        let editedCredit = '';
+
+        // para el credito
+        if ($('#DescCredit').html() != '-') {
+            editedCredit = $('#DescCredit').html();
         }
-    })
+        console.log(editedCredit);
+        console.log($("#selectClient option:selected").attr('value'));
+        console.log($('#payMethod option:selected').attr('value'));
+        console.log($('#total').html());
+        console.log($('#subtotal').html());
+        console.log(JSON.stringify(array_product));
+        console.log(action);
+        $.ajax({
+            type:'POST',
+            url:'?page=sales&action=saveSale&parameter='+$(this).attr('data-id')+'',
+            data:{
+                action:action, //action de la venta
+                client:$("#selectClient option:selected").attr('value'), // cliente seleccionado
+                credit:editedCredit, // nuevo credito del cliente
+                status:$('#payMethod option:selected').attr('value'), // estatus de la venta
+                total:$('#total').html(), // total y total de la venta
+                subtotal:$('#subtotal').html(), // subtotal de la venta
+                products:JSON.stringify(array_product) //array de los productos selecionados
+            },
+            success:(response)=>{
+                if (response === 'done') {
+                    $('#successData').html('los datos se subieron correctamente');
+                    // $('#successData').html('Los datos se guardaron correctamente');
+                    $('#successData').css({'display':'block'});
+                    setTimeout(() => {
+                        $('select').val('Selecciona...');
+                        array_product = [];
+                        $('#CarProduct').html('');
+                        $('span').html('');
+                        $('#folio').val('000'+ (parseInt($('#folio').val()) + 1));
+                        window.location.href = '?page=sales&action=';
+                    }, 2000);
+                }
+            }
+        })
+    }
 
     
 })
@@ -381,9 +425,11 @@ $(document).on('click','.expand', function(e){
 // Al seleccionar un metodo de pago
 function changePayMethod(){
     if($('#payMethod').val() == 'credito') {
-        $('#credit').html($('#credit_limit').html());
+        if (parseInt($('#credit_limit').html()) >= 1) {
+            $('#credit').html($('#credit_limit').html());
+        }
     } else {
-        $('#credit').html('0');
+        $('#credit').html('-');
     }
     CalcTotal();
 }
@@ -402,28 +448,46 @@ function getDataClient(){
                         $('#approved_credit').html('Aprobado');
                         $('#credit_limit').html(valor.credit_limit);
                         $('#credit_days').html(valor.credit_days);
-                        if ($('#payMethod option:selected').val() == 'credito') {
-                            $('#credit').html(valor.credit_limit);
+                        $('#payMethod option[value=credito]').attr('disabled',false);
+                        if (valor.credit_limit > 0) {
+                            if ($('#payMethod option:selected').val() == 'credito') {
+                                $('#credit').html(valor.credit_limit);
+                                $('#payMethod option[value=credito]').attr('disabled',false);
+                            } else {
+                                // $('#payMethod option[value=credito]').attr('disabled',true);
+                                $('#credit').html('-');
+                            }
                         } else {
-                            $('#credit').html('0');
+                            if ($('#payMethod option:selected').val() == 'credito') {
+                                $('#payMethod').val('contado');
+                            }
+                            $('#credit').html('-');
+                            $('#payMethod option[value=credito]').attr('disabled',true);
                         }
+                        
                     } else {
                         $('#approved_credit').html('No aprobado');
-                        $('#credit_limit').html('$00.00');
+                        $('#credit_limit').html('0');
                         $('#credit_days').html('0');
-                        $('#credit').html('0');
+                        if ($('#payMethod option:selected').val() == 'credito') {
+                            $('#payMethod').val('contado');
+                        }
+                        $('#payMethod option[value=credito]').attr('disabled',true);
+                        $('#credit').html('-');
                     }
                 })
                 CalcTotal();
             }
         })
+        $('#payMethod').attr('disabled',false);
     } else {
         $('#approved_credit').html('');
         $('#credit_limit').html('');
         $('#credit_days').html('');
-        $('#credit').html('0');
+        $('#credit').html('-');
         CalcTotal();
     }
+    
 }
 // Elimina el producto de la tabla de venta
 function deleteFromCar(id){
@@ -439,13 +503,15 @@ function deleteFromCar(id){
 }
 function CalcTotal(){
     let subtotal = parseInt($('#subtotal').html());
-    let credit = parseInt($('#credit').html());
+    let credit = $('#credit').html() != '-' ? parseInt($('#credit').html()) : 0;
     let descuentoCredit = credit - subtotal, finalTotal=subtotal-credit, totalDesc = 0, total = 0;
-    totalDesc = descuentoCredit > 0 ? descuentoCredit : 0;
+    totalDesc = descuentoCredit > 0 ? descuentoCredit : '-';
     total = finalTotal < 0 ? 0 : finalTotal;
     if ($('#title').html() == 'Editar Venta') {
-        if (subtotal != parseInt($('#subtotal').attr('data-subtotal'))) {
+        if (subtotal != parseInt($('#subtotal').attr('data-subtotal')) || total != $('#total').attr('data-total')) {
             $('#DescCredit').html(totalDesc);
+        } else {
+            $('#DescCredit').html('-');
         }
     } else {
         $('#DescCredit').html(totalDesc);
