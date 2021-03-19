@@ -358,11 +358,9 @@ $('#senDataSale').on('click', function(e){
         },
         success:(response)=>{
             if (response === 'done') {
-                if (response) {
-                    $('#successData').html('los datos se subieron correctamente');
-                    // $('#successData').html('Los datos se guardaron correctamente');
-                    $('#successData').css({'display':'block'});
-                }
+                $('#successData').html('los datos se subieron correctamente');
+                // $('#successData').html('Los datos se guardaron correctamente');
+                $('#successData').css({'display':'block'});
                 setTimeout(() => {
                     $('select').val('Selecciona...');
                     array_product = [];
@@ -443,12 +441,13 @@ function CalcTotal(){
     let subtotal = parseInt($('#subtotal').html());
     let credit = parseInt($('#credit').html());
     let descuentoCredit = credit - subtotal, finalTotal=subtotal-credit, totalDesc = 0, total = 0;
-    // if (descuentoCredit > 0) {
-        
-    // }
     totalDesc = descuentoCredit > 0 ? descuentoCredit : 0;
     total = finalTotal < 0 ? 0 : finalTotal;
-    if ($('#title').html() != 'Editar Venta') {
+    if ($('#title').html() == 'Editar Venta') {
+        if (subtotal != parseInt($('#subtotal').attr('data-subtotal'))) {
+            $('#DescCredit').html(totalDesc);
+        }
+    } else {
         $('#DescCredit').html(totalDesc);
     }
     $('#total').html(total);

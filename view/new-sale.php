@@ -122,7 +122,7 @@ var_dump($sale, $action);
                             <p>Crédito Nuevo: $<b><span id="DescCredit">0</span></b></p>
                         </div>
                         <div class="col-md-3">
-                            <p>Subtotal: $<b><span id="subtotal"><?= isset($sale) && !empty($sale) ? $sale[0]['subtotal'] : '';?></span></b></p>
+                            <p>Subtotal: $<b><span id="subtotal" data-subtotal="<?= isset($sale) && !empty($sale) ? $sale[0]['subtotal'] : '' ;?>"><?= isset($sale) && !empty($sale) ? $sale[0]['subtotal'] : '';?></span></b></p>
                         </div>
                         <div class="col-md-3">
                             <p>Total: $<b><span id="total"></span></b></p>

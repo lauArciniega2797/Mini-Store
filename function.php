@@ -533,18 +533,37 @@ class sales {
     public function saveSale(){
         if ($_POST) {
             include 'conexion.php';
-            $flag=false;$query="";
+            $flag=false;$query="";$id = 0;
+            // Actaualiza el credito en el cliente en caso de que la venta sea a credito
             if ($_POST['status'] == 'credito') {
                 $query = "UPDATE clients SET credit_limit = ".$_POST['credit']." WHERE id = ".$_POST['client'];
                 var_dump($query);
                 $query_prepare = $con->prepare($query);
                 $query_prepare->execute();
             }
+
+            // Inserta los datos de la venta en la tabla de la venta
+            $query_sale = "INSERT INTO sales VALUES(null, ".$_POST['client'].",'".$_POST['folio']."','".$_POST['status']."',CURRENT_TIME(),".$_POST['subtotal'].",".$_POST['total'].")";
+            var_dump($query_sale);
+            $query_prepare_sale = $con->prepare($query_sale);
+            $query_prepare_sale->execute();
+
+            // Para insertar los productos de la venta
+                // Traer el id de la venta con el folio que esta en proceso
+                    $query_folio_sale = $con->prepare("SELECT id FROM sales WHERE folio = ".$_POST['folio']);
+                    var_dump($query_folio_sale);
+                    $query_folio_sale->execute();
+                    $folio_sale = $query_folio_sale->fetchAll(PDO::FETCH_ASSOC);
+                    foreach ($folio_sale as $folio) {
+                        $id = $folio;
+                    }
+                    var_dump($id);
+
             $products = json_decode($_POST['products'],true); //el parametro true vuelve array al objeto json
             var_dump($products);
             foreach ($products as $value) {
-                var_dump("INSERT INTO sales VALUES(null,".$_POST['client'].",".$value['id'].",".$value['Cantidad'].",'".$_POST['folio']."','".$_POST['status']."',CURRENT_TIME(),".$_POST['subtotal'].",".$_POST['total'].")");
-                $query_product = $con->prepare("INSERT INTO sales VALUES(null,".$_POST['client'].",".$value['id'].",".$value['Cantidad'].",'".$_POST['folio']."','".$_POST['status']."',CURRENT_TIME(),".$_POST['subtotal'].",".$_POST['total'].")");
+                var_dump("INSERT INTO sales_products VALUES(null,".$id.",".$value['id'].",".$value['Cantidad'].")");
+                $query_product = $con->prepare("INSERT INTO sales_products VALUES(null,".$id.",".$value['id'].",".$value['Cantidad'].")");
                 $query_product->execute();
 
                 //actualizar cantidad en stock de cada producto
