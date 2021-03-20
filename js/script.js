@@ -343,7 +343,7 @@ $(document).on('change','.editCant', function(e){
 $('#senDataSale').on('click', function(e){
     let action = $(this).attr('data');
     e.preventDefault();
-    if (action != 'editSale') {
+    if (action == 'newSale') {
         $.ajax({
             type:'POST',
             url:'?page=sales&action=saveSale',
@@ -372,7 +372,8 @@ $('#senDataSale').on('click', function(e){
                 }
             }
         })
-    } else {
+    } 
+    if(action == 'editSale') {
         //para el cliente
         let editedCredit = '';
 
@@ -416,9 +417,47 @@ $('#senDataSale').on('click', function(e){
             }
         })
     }
-
+    if (action == 'deleteSale') {
+        
+        $.ajax({
+            url:'?page=sales&action=saveSale',
+            data: {
+                action: action,
+                id: $(this).attr('href')
+            },
+            type:'POST',
+            success:function(response){
+                console.log(response);
+                if (response) {
+                    $('#successDataModal').html('Se ha eliminado el producto');
+                    $('#successDataModal').css({'display':'block'});
+                    // return false;
+                }
+                setTimeout(() => {
+                    $('#successDataModal').css({'display':'none'})
+                    $('.btn-close').trigger('click');
+                    location.reload();
+                }, 3000);
+            }
+        });
+    }
     
 })
+function eliminarVenta(url){
+    $.ajax({
+        url:'?page=sales&action=getSaleToDelete&id='+url,
+        dataType:'json',
+        success:(response)=>{
+            console.log(response);
+            // Con esta funcion, puedo recorrer un array que viene de php
+            $.each(response, function (indice,valor) {
+                $('.modal-footer').find('a#senDataSale').prop('href',valor.id);
+                // $('.modal-footer').find('#senData').attr('data-id',valor.id);
+                $('#folioSale').html(valor.folio);
+            })
+        }
+    })
+}
 $(document).on('click','.expand', function(e){
     $('#'+$(e.target).attr('data-sale')).toggleClass('visibleTr');
 })

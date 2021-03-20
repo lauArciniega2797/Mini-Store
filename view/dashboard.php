@@ -1,5 +1,4 @@
 <?php
-// var_dump($productos);
   require_once 'includes/header.php';
 ?>
   <section id="main">

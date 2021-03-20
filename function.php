@@ -541,7 +541,6 @@ class sales {
             // Actaualiza el credito en el cliente en caso de que la venta sea a credito
             switch ($action) {
                 case 'editSale':
-                    echo 'Esta llegando a editar';
                     $array_productos = json_decode($_POST['products'], true);
                     $query="";
                     $id_sale = isset($_GET['parameter']) && !empty($_GET['parameter']) ? $_GET['parameter'] : false;
@@ -584,7 +583,25 @@ class sales {
                     }
 
                     break;
-                
+                case 'deleteSale':
+                    var_dump('se esta eliminando');
+                    if (isset($_POST['id']) && !empty($_POST['id'])) {
+                        $id = $_POST['id'];
+                    }
+                    include 'conexion.php'; //si la pongo por fuera, no funciona :(
+                    $query_prepare = $con->prepare("DELETE FROM sales WHERE id = $id");
+                    if($query_prepare->execute()){
+                        $flag = true;
+                    }
+                    $query_products_sale = $con->prepare("DELETE FROM sales_products WHERE sale_id = $id");
+                    if($query_products_sale->execute()){
+                        $flag = true;
+                    }
+
+                    if ($flag) {
+                        print_r('done');
+                    }
+                    break;
                 default:
                     echo 'Esta haciendo una nueva venta';
                     if ($_POST['status'] == 'credito') {
@@ -664,7 +681,7 @@ class sales {
                 echo "    <td>".$sale['fecha']."</td>";
                 echo "    <td>";
                 echo "      <a href='?page=sales&action=newSale&parameter=".$sale['id']."' class='btn btn-primary'>Editar</a>";
-                echo "      <a type='button' data-bs-toggle='modal' data-bs-target='#deleteModal' class='deleteSaleData btn btn-danger' data-href='?page=sales&action=getSaleToDelete&id=".$sale['id']."'>Eliminar</a>";
+                echo "      <a type='button' id='deleteSaleData' onclick='eliminarVenta(".$sale['id'].")' data-bs-toggle='modal' data-bs-target='#deleteModal' class='btn btn-danger'>Eliminar</a>";
                 echo "    </td>";
                 echo "</tr>";
                 echo "<tr>";
@@ -711,6 +728,20 @@ class sales {
         foreach ($sale as $row) {
             return array($row, $array_productos); 
         }
+    }
+    public function getSaleToDelete(){
+        include 'conexion.php';
+        $id="";
+        if (isset($_GET['id']) && !empty($_GET['id'])) {
+            $id = $_GET['id'];
+        }
+        $query = "SELECT id, folio FROM sales where id= $id";
+        $query_prepare = $con->prepare($query);
+        $query_prepare->execute();
+        $row = $query_prepare->fetchAll(PDO::FETCH_ASSOC);
+        // var_dump($row);
+        // var_dump($id);
+        echo json_encode($row);
     }
 }
 ?>
