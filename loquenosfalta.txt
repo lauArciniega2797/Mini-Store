@@ -14,7 +14,7 @@
  - nueva venta
  - historial de ventas (filtro por mes, año, semana, quincena)
  - Si es deuda pues a deudores.
- - Si es credito se va descontando.
+ - Si es credito se va descontando. *------- DONE ---------*
 
 • DEUDORES (Automatico)
  - Nombre cliente, total de la deuda, folio venta, accion:pagado.

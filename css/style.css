@@ -6,8 +6,8 @@ a un elemento y tambien agregamos relleno y borde, entonces el elemento
 crecera mas de lo que le especificamos.
 Por eso en ocasiones es mejor el valor de border-box para la propiedad */
 * {box-sizing: border-box;margin:0; padding: 0;}
-body{font-size: 12pt;font-family: sans-serif;position:relative;}/* cambia la fuente */
-body#login{/*este es el fondo si no es admin: background-color: #f5f5f5;*/background-color: #32424a; font-size: 12pt;font-family: sans-serif;position:relative;}/* cambia la fuente */
+body{font-size: 12pt;font-family: sans-serif;position:relative;background-color: #f1f3f8!important;}/* cambia la fuente */
+body#login{/*este es el fondo si no es admin: background-color: #f5f5f5;*/background-color: #32424a!important; font-size: 12pt;font-family: sans-serif;position:relative;}/* cambia la fuente */
 
 /* NAVBAR */
 /* header{background-color: #8675a9;} 
@@ -38,6 +38,18 @@ header nav div ul{list-style-type: none;}
 header nav div h2 {color: #fff;} /* Este se va a eliminar cuando cambies a foto el logo 
 header nav div ul li a {text-decoration: none; color: #fff;} */
 
+/* MENU */
+.user-options {
+    width: 9%;
+}
+.user-options a {
+    color: #707071;
+    text-decoration: none;
+}
+section {
+    width: 80%;
+    margin: 3% auto 0 auto;
+}
 /* CONTENIDO PRINCIPAL */
 main{
     width: 70%;
@@ -268,3 +280,166 @@ tr td div table {
     width: 60%;
     margin: 20px auto 20px auto;
 }
+
+/* NUEVA VENTA STYLES */
+.modal-dialog {
+    max-width: 30%!important;
+}
+.modal-body form {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+}
+.modal-body form div:first-child {
+    width: 70%;
+}
+.modal-body form div:last-child {
+    width: 30%;
+}
+.modal-body form div p[for="inputFolio"] {
+    display: block;
+    text-align: right;
+}
+.modal-body form #confirmFolio {
+    width: 50%;
+    padding: 5px 10px;
+    border-radius: 4px;
+    border: 1px solid #bfbfbf;
+    display: block;
+    margin-left: auto;
+}
+#pay {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    margin: 6% 0;
+}
+#pay p {
+    font-weight: 500;
+    font-size: 1.2rem;
+}
+#TotalSale {
+    color: #7d7d7d;
+    display: block;
+    font-size: 2.5rem;
+    text-align: center;
+    user-select: none;
+}
+#payClient-box span {
+    color: #7d7d7d;
+    font-size: 2.5rem;
+}
+input#user_pay {
+    border-bottom: 3px solid #ced4da;
+    border-left: none;
+    border-right: none;
+    border-top: none;
+    color: #7d7d7d;
+    display: inline-block;
+    font-size: 2.5rem;
+    margin: 0 auto;
+    outline: none;
+    padding: 5px 10px;
+    text-align: center;
+    width: 90%;
+}
+
+.container, #newSaleForm {
+    margin-top: 3%;
+}
+
+#newSaleForm div.box {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: space-between
+}
+#newSaleForm div.box div.box-content:nth-child(1),
+#newSaleForm div.box div.box-content:nth-child(3){
+    width: 20%;
+}
+#newSaleForm div.box div.box-content:nth-child(3){
+    padding: 0;
+}
+#newSaleForm div.box div.box-content:nth-child(2){
+    width: 58%;
+    margin: 0 auto;
+}
+#newSaleForm div.box div.box-content{
+    padding: 20px;
+    background-color: white;
+    border:1px solid #cfcfcf;
+    box-shadow: 0px 12px 15px -5px #cfcfcf;
+    border-radius: 4px;
+}
+.folio {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 10%;
+}
+.folio p {
+    margin: 0;
+}
+.folio input{
+    padding: 5px 10px;
+    border-radius: 4px;
+    outline: none;
+    border: 1px solid #cfcfcf;
+    width: 30%;
+    text-align: right;
+}
+.form-select:focus,
+.select_product_configuration div:nth-child(2) input[type="number"]:focus {
+    box-shadow: none!important;
+    border-color: #cfcfcf!important;
+    outline:none!important;
+}
+.clientes .form-select{
+    margin-bottom: 5%;
+}
+.select_product_configuration {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-end;
+    justify-content: space-between;
+    margin-bottom: 5%;
+}
+.select_product_configuration div:nth-child(1){
+    width: 69%;
+}
+.select_product_configuration div:nth-child(2){
+    width: 19%;
+}
+.select_product_configuration div:nth-child(3){
+    width: 10%;
+}
+#subtotal-box {
+    background-color: #16c79a;
+    color: white;
+    padding: 10px 20px;
+    margin: 0;
+}
+#subtotal-box ~ div {
+    padding: 20px;
+}
+#subtotal-box ~ div #sale_type {
+    margin-bottom: 20px;
+}
+#subtotal-box ~ div #sale_type p {margin: 0;}
+#subtotal-box span {
+    font-size: 3rem;
+    display: block;
+    text-align: center;
+}
+.float-left {float: right;}
+#creditoClient-box,
+#newCreditoClient-box {display: none;}
+#creditoClient-box.active,
+#newCreditoClient-box.active {display: block;}
+
+#InfoDataPay,#successDataPay,#failDataPay,#failGeneral{display: none;}
+#InfoDataPay.active,#successDataPay.active,#failDataPay.active,#failGeneral.active{display: block;}

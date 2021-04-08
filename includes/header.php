@@ -18,7 +18,7 @@
           <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbarNavDropdown">
-          <ul class="navbar-nav">
+          <ul class="navbar-nav me-auto mb-2 mb-lg-0">
             <li class="nav-item">
               <a class="nav-link active" aria-current="page" href="?page=dashboard&action=">Inicio</a>
             </li>
@@ -58,13 +58,10 @@
                 <li><a class="dropdown-item" href="?page=providers&action=newProvider">Nuevo Proveedor</a></li>
               </ul>
             </li>
-            <li class="nav-item">
-              <a class="nav-link" href="#">Contactos</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="?page=user&action=closeSesion">Cerrar sesion</a>
-            </li>
           </ul>
+          <div class="user-options">
+            <a class="" href="?page=user&action=closeSesion">Cerrar sesion</a>
+          </div>
         </div>
       </div>
     </nav>

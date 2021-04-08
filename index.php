@@ -1,38 +1,65 @@
 <?php
-session_start();
+  session_start();
   include 'function.php';
-  if (isset($_GET['page']) && !empty($_GET['page'])) { //si exite page y no esta vacia
-    $clase = $_GET['page'];
-  } else if(!isset($_GET['page']) && empty($_GET['page'])) { //si no existe page y esta vacia
-    if (isset($_SESSION['user'])) {
-      $clase = "dashboard";
+  if (isset($_GET['page'])) {
+    if (!empty($_GET['page'])) {
+      if (isset($_SESSION['user']) && !empty($_SESSION['user'])) {
+        $clase = $_GET['page'];
+      } else {
+        $clase ="user";
+        // header('Location: ?page=user&action=');
+      }
     } else {
-      $clase = "user"; //aqui va el login
+      if (isset($_SESSION['user']) && !empty($_SESSION['user'])) {
+        $clase = "dashboard";
+      } else {
+        $clase = "user";
+        // header('Location: ?page=user&action=');
+      }
     }
-  } else {
-    echo 'Clase no valida';
+  }
+  else {
+    echo 'Clase no declarada en la url';
   }
 
   if (class_exists($clase)) { //si la clase anterior existe
     $objectInstance = new $clase; //instanciamos la clase
     
-    if (isset($_GET['action']) && !empty($_GET['action'])) {
-      if (method_exists($objectInstance, $_GET['action'])) {
-        $action = $_GET['action'];
-        $objectInstance->$action();
-      } else{
-        echo 'Esa no es una accion valida';
-      }
-    } else if(empty($_GET['action'])) {
-      if (isset($_SESSION['user']) && !empty($_SESSION['user'])) {
-        $action = "index";
+    if (isset($_GET['action'])) {
+      if (!empty($_GET['action'])) {
+        if (method_exists($objectInstance, $_GET['action'])) {
+          $action = $_GET['action'];
+          $objectInstance->$action();
+        } else{
+          echo 'Esa no es una accion valida';
+        }
       } else {
-        $action = "index"; //aqui va el login
+        $action = 'index';
+        $objectInstance->$action();
       }
-      $objectInstance->$action();
     } else {
-      echo 'Esa acción no es valida';
+      echo 'Action no declarada en la url';
     }
+
+    // if (isset($_GET['action']) && !empty($_GET['action'])) {
+    //   if (method_exists($objectInstance, $_GET['action'])) {
+    //     $action = $_GET['action'];
+    //     $objectInstance->$action();
+    //   } else{
+    //     echo 'Esa no es una accion valida';
+    //   }
+    // } else if(empty($_GET['action'])) {
+    //   if (isset($_SESSION['user']) && !empty($_SESSION['user'])) {
+    //     $action = "index";
+    //   } else {
+    //     $action = "index"; //aqui va el login
+    //   }
+    //   $objectInstance->$action();
+    // } else {
+    //   echo 'Esa acción no es valida';
+    // }
+  } else {
+    echo 'la clase no existe';
   }
 
 ?>

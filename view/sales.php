@@ -1,27 +1,50 @@
 <?php require_once 'includes/header.php';?>
-<section id="main">
+<section>
+    <h2 id="title" style="margin-bottom:30px;">Tus Ventas</h2>
+    <hr>
     <article>
-        <h1>Tus ventas</h1>
-    </article>
-    <article id="products">
-        <div class="carousel-productos">
-            <table style="width:100%">
-                <thead>
-                    <tr>
-                        <th>No.</th>
-                        <th>Folio</th>
-                        <th>Cliente</th>
-                        <th>Productos</th>
-                        <th>Status</th>
-                        <th>Total</th>
-                        <th>Fecha de creción</th>
-                        <th>Acciones</th>
-                    </tr>
-                </thead>
-                <tbody id="table_sales"></tbody>
-            </table>
-            <!-- <a href="" class="btn btn-primary" id="productstofinish">Ver mas productos por terminar</a> -->
-        </div>
+        <table class="table table-hover">
+            <thead class="table-dark">
+                <tr>
+                    <th>No.</th>
+                    <th>
+                        <p>Folio</p>
+                        <input type="text" id="filtroFolio">
+                    </th>
+                    <th>
+                        <p>Tipo</p>
+                        <select name="status" id="filtroTipo">
+                            <option value="">Selecciona...</option>
+                            <option value="credito">Crèdito</option>
+                            <option value="contado">Contado</option>
+                        </select>
+                    </th>
+                    <th>
+                        <p>Cliente</p>
+                        <input type="text" id="filtroCliente">
+                    </th>
+                    <th>Subtotal</th>
+                    <th>Total</th>
+                    <th>Pagó con</th>
+                    <th>
+                        <p>Status</p>
+                        <select name="status" id="filtroStatus">
+                            <option value="">Selecciona...</option>
+                            <option value="pendiente">Pendiente</option>
+                            <option value="pagada">Pagada</option>
+                        </select>
+                    </th>
+                    <th>Productos</th>
+                    <th>
+                        <p>Fecha de creción</p>
+                        <input type="text" id="filtrofecha">
+                    </th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody id="table_sales"></tbody>
+        </table>
+        
 
         <!-- Modal -->
         <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
