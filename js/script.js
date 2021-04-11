@@ -1068,9 +1068,6 @@ function eliminarVenta(url){
         }
     })
 }
-function eliminarProducto(url){
-
-}
 // function onKeyDownHandler(event) {
 //     event.stopPropagation()
 //     var parent = event.target;
