@@ -1,20 +1,22 @@
 • Seccion de productos
  - Nuevo producto *------- DONE ---------*
- - Editar y eliminar *------- DONE ---------*
+ - Editar y eliminar (Si edita, pero no quiere eliminar)
  - Todos los productos *------- DONE ---------*
- - Filtrar productos
+ - Filtrar productos *------- DONE ---------*
 
 • Clientes
  - Nuevo *------- DONE ---------*
- - Editar o eliminar *------- DONE ---------*
+ - Editar o eliminar (Si edita, pero no quiere eliminar)
  - Deuda o descuento del credito. *------- DONE ---------*
- - filtrar ventas
+ - filtrar clientes *------- DONE ---------*
+ - Validar que no pueda ingresar el mismo cliente *------- DONE ---------*
 
 • Seccion de ventas
- - nueva venta
+ - nueva venta *------- DONE ---------*
  - historial de ventas (filtro por mes, año, semana, quincena)
  - Si es deuda pues a deudores.
  - Si es credito se va descontando. *------- DONE ---------*
+ - filtro en ventas *------- DONE ---------*
 
 • DEUDORES (Automatico)
  - Nombre cliente, total de la deuda, folio venta, accion:pagado.
@@ -28,11 +30,11 @@
 • UI
  - Validaciones
  - diseño a las paginas
- - avisos en productos (no hay productos, no hay productos por agotarse)
- - en el navegador chrome, actualiza el formulario sin pedirlo.
+ - avisos en productos (no hay productos, no hay productos por agotarse) *------- DONE ---------*
+ - en el navegador chrome, actualiza el formulario sin pedirlo. *------- DONE ---------*
 
 • ADMIN o USUARIO
- - admin, puede eliminar, editar y agregar productos, proveedores, clientes, deudores, pagos, ventas, login
+ - admin, puede eliminar, editar y agregar productos, proveedores, clientes, deudores, pagos, ventas, login 
  - seccion en menu o en la url para entrar a administrador
  - usuario, solo ve productos y el contacto
 

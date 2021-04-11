@@ -56,9 +56,12 @@ class products{
             $product = $this->getProductToEdit($_GET['parameter']);
             $action = 'editProduct';
         }
+        $proovedores = new providers();
+        $getProviders = $proovedores->getProviders();
         require_once 'view/new-product.php';
     }
     public function saveProducts(){
+        $all_done = false;
         if($_POST){
             $function = "";$id="";
             if(isset($_GET['function']) && !empty($_GET['function'])){
@@ -75,6 +78,7 @@ class products{
             }
             switch ($function) {
                 case 'newProduct':
+                    include 'conexion.php'; //si la pongo por fuera, no funciona :(
                     $name = $_POST['name'];
                     $price = $_POST['price'];
                     $procedence_store = $_POST['procedence_store'];
@@ -101,14 +105,29 @@ class products{
                         $status = "full";
                     }
         
-                    $query = "INSERT INTO products VALUES(null,'$name',$price,'$image_name','$procedence_store',$store_price,$quantity,'$status')";
-                    include 'conexion.php'; //si la pongo por fuera, no funciona :(
-                    $query_prepare = $con->prepare($query);
-                    if($query_prepare->execute()){
-                        echo 'done';
+                    //proveedor
+                    $provider='';$provider_name='';
+                    $query_providers = $con->prepare('SELECT comercial_name FROM providers WHERE id='.$procedence_store);
+                    if ($query_providers->execute()) {
+                        $provider = $query_providers->fetchAll(PDO::FETCH_ASSOC);
+                        foreach ($provider as $value) {
+                            $provider_name = $value['comercial_name'];
+                        }
+                        $all_done = true;
+                    } else {
+                        $all_done = false;
+                    }
+
+                    if ($all_done) {
+                        $query = "INSERT INTO products VALUES(null,'$name',$price,'$image_name','$provider_name',$store_price,$quantity,'$status')";
+                        $query_prepare = $con->prepare($query);
+                        if($query_prepare->execute()){
+                            print_r('done');
+                        }
                     }
                     break;
                 case 'editProduct':
+                    include 'conexion.php'; //si la pongo por fuera, no funciona :(
                     $name = $_POST['name'];
                     $price = $_POST['price'];
                     $procedence_store = $_POST['procedence_store'];
@@ -124,6 +143,18 @@ class products{
                     } else {
                         $status = "full";
                     }
+                    //proveedor
+                    $provider='';$provider_name='';
+                    $query_providers = $con->prepare('SELECT comercial_name FROM providers WHERE id='.$procedence_store);
+                    if ($query_providers->execute()) {
+                        $provider = $query_providers->fetchAll(PDO::FETCH_ASSOC);
+                        foreach ($provider as $value) {
+                            $provider_name = $value['comercial_name'];
+                        }
+                        $all_done = true;
+                    } else {
+                        $all_done = false;
+                    }
                     $image_name = null;
                     if ($image) {
                         $image_name = $image['name'];
@@ -131,18 +162,17 @@ class products{
                             //almacenar la imagen en un directorio
                             $directory = 'images/';
                             move_uploaded_file($image['tmp_name'],$directory.$image_name);
-                            $query = "UPDATE products SET name = '$name', price = $price, image = '$image_name', procedence_store = '$procedence_store', store_price = $store_price, quantity=$quantity, status = '$status' WHERE id = $id";
+                            $query = "UPDATE products SET name = '$name', price = $price, image = '$image_name', procedence_store = '$provider_name', store_price = $store_price, quantity=$quantity, status = '$status' WHERE id = $id";
                         } else {
-                            $query = "UPDATE products SET name = '$name', price = $price, procedence_store = '$procedence_store', store_price = $store_price, quantity=$quantity, status = '$status' WHERE id =  $id";
+                            $query = "UPDATE products SET name = '$name', price = $price, procedence_store = '$provider_name', store_price = $store_price, quantity=$quantity, status = '$status' WHERE id =  $id";
                         }
                     }
-        
-                    var_dump($query);
                     // $query = "INSERT INTO products VALUES(null,'$name',$price,'$image_name','$procedence_store',$store_price,$quantity,'$status')";
-                    include 'conexion.php'; //si la pongo por fuera, no funciona :(
-                    $query_prepare = $con->prepare($query);
-                    if($query_prepare->execute()){
-                        echo 'done';
+                    if ($all_done) {
+                        $query_prepare = $con->prepare($query);
+                        if($query_prepare->execute()){
+                            echo 'done';
+                        }
                     }
                     break;
                 case 'deleteProduct':
@@ -181,13 +211,23 @@ class products{
         return $row;
     }
     public function getProductToEdit($id){
-        $query = "SELECT * FROM products where id=$id";
         include 'conexion.php';
+        $query = "SELECT * FROM products where id = $id";
         $query_prepare = $con->prepare($query);
-        $query_prepare->execute();
-        $row = $query_prepare->fetchAll(PDO::FETCH_ASSOC);
-        foreach ($row as $producto) {
-            return $producto;
+        if($query_prepare->execute()){
+            $row = $query_prepare->fetchAll(PDO::FETCH_ASSOC);
+            foreach ($row as $producto) {
+                $provedor_name='';$company_name=$producto['procedence_store'];
+                $query_id_proveedor = $con->prepare("SELECT id FROM providers WHERE comercial_name='$company_name'");
+                // var_dump($query_id_proveedor);
+                if ($query_id_proveedor->execute()) {
+                    $provedor = $query_id_proveedor->fetchAll(PDO::FETCH_ASSOC);
+                    foreach ($provedor as $value) {
+                        $provedor_name = $value['id'];
+                    }
+                }
+                return array($producto, $provedor_name);
+            }
         }
     }
     public function getProductToDelete(){
@@ -195,7 +235,9 @@ class products{
         if (isset($_GET['id']) && !empty($_GET['id'])) {
             $id = $_GET['id'];
         }
+        var_dump($id);
         $query = "SELECT id, name, image FROM products where id=$id";
+        var_dump($query);
         include 'conexion.php';
         $query_prepare = $con->prepare($query);
         $query_prepare->execute();
@@ -204,7 +246,57 @@ class products{
         
         echo json_encode($row);
     }
+    public function filterProducts(){
+        include 'conexion.php';
+        if ($_POST) {
+            $filter_per = $_POST['filter'];
+            $filter_type = $_POST['filter_per'];
+            $errores = false;
+            $results = false;
 
+            $query = "SELECT * FROM products WHERE $filter_per LIKE '%$filter_type%' ORDER BY name ASC";
+            $query_products_filter = $con->prepare($query);
+            if($query_products_filter->execute()){
+                $sale_products = $query_products_filter->fetchAll(PDO::FETCH_ASSOC);
+                if (count($sale_products)) {
+                    foreach ($sale_products as $index => $product) {
+                        echo "<tr>";
+                        echo "    <td>".($index + 1)."</td>";
+                        if ($product['image'] == '') {
+                            echo "    <td><img height='50px' src='https://images.unsplash.com/photo-1567039430063-2459256c6f05?ixid=MXwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHw%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=1267&q=80' class='card-img-top' alt='Eunicodin'></td>";
+                        } else {
+                            echo "    <td><img height='50px' src='images/".$product['image']."' class='card-img-top' alt='Eunicodin'></td>";
+                        }
+                        echo "    <td>".$product['name']."</td>";
+                        echo "    <td>$ ".$product['store_price']."</td>";
+                        echo "    <td>$ ".$product['price']."</td>";
+                        echo "    <td>".$product['procedence_store']."</td>";
+                        echo "    <td>".$product['quantity']."</td>";
+                        echo "    <td>".$product['status']."</td>";
+                        echo "    <td>";
+                        echo "        <a href='?page=products&action=newProduct&parameter=".$product['id']."' class='btn btn-primary'><i class='fas fa-edit'></i></a>";
+                        echo "        <a type='button' href='javascript:void(0)' data-bs-toggle='modal' data-bs-target='#deleteProductModal' class='btn btn-danger' onclick='delete_product(".$product['id'].")'><i class='fas fa-trash-alt'></i></a>";
+                        echo "    </td>";
+                        echo "</tr>";
+                    }
+                } else {
+                    echo "<tr>";
+                    echo "    <td colspan='11' id='noCoincidencias'>No se encontraron coincidencias</td>";
+                    echo "</tr>";
+                }
+            } else {
+                $errores = true;
+            }
+
+            if (!$errores) {
+                if ($results) {
+                    print_r('No se encontraron coincidencias');
+                }
+            } else {
+                print_r('Algo salio mal');
+            }
+        }
+    }
 }
 
 class clients {
@@ -222,7 +314,6 @@ class clients {
     }
     public function saveClient(){
         if($_POST){
-            var_dump($_POST);
             $function = "";$id="";
             if(isset($_GET['function']) && !empty($_GET['function'])){
                 $function = $_GET['function'];
@@ -236,58 +327,97 @@ class clients {
             if (isset($_POST['id']) && !empty($_POST['id'])) {
                 $id = $_POST['id'];
             }
-            var_dump($id);
-            var_dump($function);
             switch ($function) {
                 case 'newClient':
-                    $name = $_POST['name'];
-                    $email = $_POST['email'];
-                    $phone = $_POST['phone'];
-                    $bank_reference = $_POST['bank_reference'];
-                    $query="";
-
-                    if (isset($_POST["checkCredit"]) && $_POST["checkCredit"] == 0){
-                        echo "Checkbox seleccionado";
-                        $credit_limit = $_POST['credit_limit'];
-                        $credit_days = $_POST['credit_days'];
-                        // INSERT INTO clients VALUES(null,'margarita','example@example.com',15467984,0,200,2,1234567890)
-                        $query = 'INSERT INTO clients VALUES(null,"'.$name.'","'.$email.'",'.$phone.','.$_POST['checkCredit'].','.$credit_limit.','.$credit_limit.','.$credit_days.',"'.$bank_reference.'")';
-                    } else{
-                        echo "Checkbox no seleccionado";
-                        $query = 'INSERT INTO clients VALUES(null,"'.$name.'","'.$email.'",'.$phone.',1,null,null,"'.$bank_reference.'")';
-                        // $query = 'INSERT INTO clients VALUES(null,'$name','$email','$phone',null,null,null,'$bank_reference')';
-                    }
-                    var_dump($query);
                     include 'conexion.php'; //si la pongo por fuera, no funciona :(
-                    $query_prepare = $con->prepare($query);
-                    if($query_prepare->execute()){
-                        echo 'done';
+                    $name = $_POST['name'];
+                    $email = $_POST['email'] != '' ? $_POST['email'] : '';
+                    $phone = $_POST['phone'] != '' ? $_POST['phone'] : null;
+                    $bank_reference = $_POST['bank_reference'] != '' ? $_POST['bank_reference'] : '';
+                    $query="";$no_exist_client = false;
+
+                    //verificar que el cliente no exista en la tabla clientes
+                    $query_comprobe_clients = $con->prepare("SELECT name FROM clients WHERE name LIKE '%$name%'");
+                    if($query_comprobe_clients->execute()){
+                        $exist = $query_comprobe_clients->fetchAll(PDO::FETCH_ASSOC);
+                        if (count($exist) > 0) {
+                            $no_exist_client = true;
+                        }
+                    }
+                    if ($no_exist_client == false) {
+                        if (isset($_POST["checkCredit"]) && $_POST["checkCredit"] == 0){
+                            $credit_limit = $_POST['credit_limit'];
+                            $credit_days = $_POST['credit_days'];
+                            $credito = 'Aprobado';
+                            if (is_null($phone)) {
+                                $query = 'INSERT INTO clients VALUES(null,"'.$name.'","'.$email.'",null,"'.$credito.'",'.$credit_limit.','.$credit_limit.','.$credit_days.',"'.$bank_reference.'")';
+                            } else {
+                                $query = 'INSERT INTO clients VALUES(null,"'.$name.'","'.$email.'",'.$phone.',"'.$credito.'",'.$credit_limit.','.$credit_limit.','.$credit_days.',"'.$bank_reference.'")';
+                            }
+                            // INSERT INTO clients VALUES(null,'margarita','example@example.com',15467984,0,200,2,1234567890)
+                        } else{
+                            if (is_null($phone)) {
+                                $query = 'INSERT INTO clients VALUES(null,"'.$name.'","'.$email.'",null,"Rechazado",null,null,"'.$bank_reference.'")';
+                            } else {
+                                $query = 'INSERT INTO clients VALUES(null,"'.$name.'","'.$email.'",'.$phone.',"Rechazado",null,null,"'.$bank_reference.'")';
+                            }
+                            // $query = 'INSERT INTO clients VALUES(null,'$name','$email','$phone',null,null,null,'$bank_reference')';
+                        }
+                        $query_prepare = $con->prepare($query);
+                        if($query_prepare->execute()){
+                            echo 'done';
+                        }
                     }
                     break;
                 case 'editClient':
-                    echo 'Esta llegando a editar';
-                    $name = $_POST['name'];
-                    $email = isset($_POST['email']) && !empty($_POST['email']) ? $_POST['email'] : 'N/A';
-                    $phone = isset($_POST['phone']) && !empty($_POST['phone']) ? $_POST['phone'] : 'null';
-                    $bank_reference = $_POST['bank_reference'];
-                    $query="";
-
-                    if (isset($_POST["checkCredit"]) && $_POST["checkCredit"] == 0){
-                        echo "Checkbox seleccionado";
-                        $credit_limit = $_POST['credit_limit'];
-                        $credit_days = $_POST['credit_days'];
-                        // INSERT INTO clients VALUES(null,'margarita','example@example.com',15467984,0,200,2,1234567890)
-                        $query = 'UPDATE clients SET name = "'.$name.'", email = "'.$email.'", phone = '.$phone.', approved_credit = '.$_POST['checkCredit'].', credit_limit = '.$credit_limit.', credit_days = '.$credit_days.', bank_reference = "'.$bank_reference.'" WHERE id = '.$id;
-                    } else{
-                        echo "Checkbox no seleccionado";
-                        $query = 'UPDATE clients SET name = "'.$name.'", email = "'.$email.'", phone = '.$phone.', approved_credit = 1, credit_limit = null, credit_days = null, bank_reference = "'.$bank_reference.'" WHERE id = '.$id;
-                    }
-
-                    var_dump($query);
                     include 'conexion.php'; //si la pongo por fuera, no funciona :(
-                    $query_prepare = $con->prepare($query);
-                    if($query_prepare->execute()){
-                        echo 'done';
+                    $name = $_POST['name'];
+                    $email = $_POST['email'] != '' ? $_POST['email'] : '';
+                    $phone = $_POST['phone'] != '' ? $_POST['phone'] : null;
+                    $bank_reference = $_POST['bank_reference'] != '' ? $_POST['bank_reference'] : '';
+                    $query="";$no_exist_client = false;$no_modified_yet=false;
+
+                    $edit_same_client = $con->prepare("SELECT name FROM clients WHERE id = ".$id);
+                    if($edit_same_client->execute()){
+                        $not_modified = $edit_same_client->fetchAll(PDO::FETCH_ASSOC);
+                        foreach ($not_modified as $value) {
+                            if ($name === $value['name']) {
+                                $no_modified_yet = true;
+                            }
+                        }
+                    }
+                    if ($no_modified_yet == false) {
+                        $query_comprobe_clients = $con->prepare("SELECT name FROM clients WHERE name LIKE '%$name%'");
+                        if($query_comprobe_clients->execute()){
+                            $exist = $query_comprobe_clients->fetchAll(PDO::FETCH_ASSOC);
+                            if (count($exist) > 0) {
+                                $no_exist_client = true;
+                            }
+                        }
+                    }
+                    if ($no_exist_client == false) {
+                        if (isset($_POST["checkCredit"]) && $_POST["checkCredit"] == 0){
+                            $credit_limit = $_POST['credit_limit'];
+                            $credit_days = $_POST['credit_days'];
+                            $credito = 'Aprobado';
+                            if (is_null($phone)) {
+                                $query = 'UPDATE clients SET name = "'.$name.'", email = "'.$email.'", approved_credit = "'.$credito.'", credit_limit = '.$credit_limit.', credit_days = '.$credit_days.', bank_reference = "'.$bank_reference.'" WHERE id = '.$id;
+                            } else {
+                                $query = 'UPDATE clients SET name = "'.$name.'", email = "'.$email.'", phone = '.$phone.', approved_credit = "'.$credito.'", credit_limit = '.$credit_limit.', credit_days = '.$credit_days.', bank_reference = "'.$bank_reference.'" WHERE id = '.$id;
+                            }
+                            // INSERT INTO clients VALUES(null,'margarita','example@example.com',15467984,0,200,2,1234567890)
+                        } else{
+                            if (is_null($phone)) {
+                                $query = 'UPDATE clients SET name = "'.$name.'", email = "'.$email.'",bank_reference = "'.$bank_reference.'" WHERE id = '.$id;
+                            } else {
+                                $query = 'UPDATE clients SET name = "'.$name.'", email = "'.$email.'",phone = '.$phone.', bank_reference = "'.$bank_reference.'" WHERE id = '.$id;
+                            }
+                            // $query = 'INSERT INTO clients VALUES(null,'$name','$email','$phone',null,null,null,'$bank_reference')';
+                        }
+                        $query_prepare = $con->prepare($query);
+                        if($query_prepare->execute()){
+                            echo 'done';
+                        }
                     }
                     break;
                 case 'deleteClient':
@@ -333,6 +463,62 @@ class clients {
         
         echo json_encode($row);
     }
+    public function filterClients(){
+        include 'conexion.php';
+        if ($_POST) {
+            $filter_per = $_POST['filter'];
+            $filter_type = $_POST['filter_per'];
+            $errores = false;
+            $results = false;
+
+            if ($filter_per == 'approved_credit') {
+                if ($filter_type == '0') {
+                    $filter_type = 'Aprobado';
+                } else if ($filter_type == '1') {
+                    $filter_type = 'Rechazado';
+                }
+            }
+
+            $query = "SELECT * FROM clients WHERE $filter_per LIKE '%$filter_type%'";
+            var_dump($query);
+            $query_clients_filter = $con->prepare($query);
+            if($query_clients_filter->execute()){
+                $clients_data = $query_clients_filter->fetchAll(PDO::FETCH_ASSOC);
+                if (count($clients_data)) {
+                    foreach ($clients_data as $index => $client) {
+                        echo "<tr>";
+                        echo "    <td>".($index + 1)."</td>";
+                        echo "    <td>".$client['name']."</td>";
+                        echo "    <td>".$client['email']."</td>";
+                        echo "    <td>".$client['phone']."</td>";
+                        echo "    <td>".$client['approved_credit']."</td>";
+                        echo "    <td>".$client['credit_limit']."</td>";
+                        echo "    <td>".$client['credit_days']."</td>";
+                        echo "    <td>".$client['bank_reference']."</td>";
+                        echo "    <td>";
+                        echo "        <a href='?page=clients&action=newclient&parameter=".$client['id']."' class='btn btn-primary'><i class='fas fa-edit'></i></a>";
+                        echo "        <a type='button' href='javascript:void(0)' data-bs-toggle='modal' data-bs-target='#deleteProductModal' class='btn btn-danger' onclick='delete_product(".$client['id'].")'><i class='fas fa-trash-alt'></i></a>";
+                        echo "    </td>";
+                        echo "</tr>";
+                    }
+                } else {
+                    echo "<tr>";
+                    echo "    <td colspan='11' id='noCoincidencias'>No se encontraron coincidencias</td>";
+                    echo "</tr>";
+                }
+            } else {
+                $errores = true;
+            }
+
+            if (!$errores) {
+                if ($results) {
+                    print_r('No se encontraron coincidencias');
+                }
+            } else {
+                print_r('Algo salio mal');
+            }
+        }
+    }
 }
 
 class providers {
@@ -350,7 +536,6 @@ class providers {
     }
     public function saveProvider(){
         if($_POST){
-            var_dump($_POST);
             $function = "";$id="";
             if(isset($_GET['function']) && !empty($_GET['function'])){
                 $function = $_GET['function'];
@@ -364,41 +549,48 @@ class providers {
             if (isset($_POST['id']) && !empty($_POST['id'])) {
                 $id = $_POST['id'];
             }
-            var_dump($id);
-            var_dump($function);
             switch ($function) {
                 case 'newProvider':
-                    $rfc = $_POST['rfc'];
-                    $comercial_name = $_POST['comercial_name'];
-                    $type = $_POST['type'];
-                    $phone = $_POST['phone'];
-                    $street = $_POST['street'];
-                    $suburb = $_POST['suburb'];
-                    $number = $_POST['number'];
-                    $postal_code = $_POST['postal_code'];
-                    $tag = $_POST['tag'];
-                    // "INSERT INTO providers VALUES('sdfsdfasdf6as54d6fa464','Chavita','Dulceria',,'','',,,'Pesimo jefe')"
-                    $query="INSERT INTO providers VALUES(null,'$rfc','$comercial_name','$type',$phone,'$street','$suburb',$number,$postal_code,'$tag')";
-                    var_dump($query);
                     include 'conexion.php'; //si la pongo por fuera, no funciona :(
+                    $rfc = $_POST['rfc'] != '' ? $_POST['rfc'] : '';
+                    $comercial_name = $_POST['comercial_name'] != '' ? $_POST['comercial_name'] : '';
+                    $type = $_POST['type'] != '' ? $_POST['type'] : '';
+                    $phone = $_POST['phone'] != '' ? $_POST['phone'] : null;
+                    $street = $_POST['street'] != '' ? $_POST['street'] : '' ;
+                    $suburb = $_POST['suburb'] != '' ? $_POST['suburb'] : '';
+                    $number = $_POST['number'] != '' ? $_POST['number'] : '';
+                    $postal_code = $_POST['postal_code'] != '' ? $_POST['postal_code'] : 00000;
+                    $tag = $_POST['tag'] != '' ? $_POST['tag'] : '';
+
+                    if (is_null($phone)) {
+                        $query = 'INSERT INTO providers VALUES(null,"'.$rfc.'","'.$comercial_name.'","'.$type.'","'.$street.'","'.$suburb.'","'.$number.'",'.$postal_code.',"'.$tag.'")';
+                    } else {
+                        $query = 'INSERT INTO providers VALUES(null,"'.$rfc.'","'.$comercial_name.'","'.$type.'",'.$phone.',"'.$street.'","'.$suburb.'","'.$number.'",'.$postal_code.',"'.$tag.'")';
+                    }
+                    
                     $query_prepare = $con->prepare($query);
                     if($query_prepare->execute()){
                         echo 'done';
                     }
                     break;
                 case 'editProvider':
-                    $rfc = $_POST['rfc'];
-                    $comercial_name = $_POST['comercial_name'];
-                    $type = $_POST['type'];
-                    $phone = $_POST['phone'];
-                    $street = $_POST['street'];
-                    $suburb = $_POST['suburb'];
-                    $number = $_POST['number'];
-                    $postal_code = $_POST['postal_code'];
-                    $tag = $_POST['tag'];
+                    $rfc = $_POST['rfc'] != '' ? $_POST['rfc'] : '';
+                    $comercial_name = $_POST['comercial_name'] != '' ? $_POST['comercial_name'] : '';
+                    $type = $_POST['type'] != '' ? $_POST['type'] : '';
+                    $phone = $_POST['phone'] != '' ? $_POST['phone'] : null;
+                    $street = $_POST['street'] != '' ? $_POST['street'] : '' ;
+                    $suburb = $_POST['suburb'] != '' ? $_POST['suburb'] : '';
+                    $number = $_POST['number'] != '' ? $_POST['number'] : '';
+                    $postal_code = $_POST['postal_code'] != '' ? $_POST['postal_code'] : 00000;
+                    $tag = $_POST['tag'] != '' ? $_POST['tag'] : '';
+
+                    if (is_null($phone)) {
+                        $query = "UPDATE providers SET RFC='$rfc',comercial_name='$comercial_name',type='$type',street='$street',suburb='$suburb',number='$number',postal_code=$postal_code,tag='$tag' WHERE id = $id";
+                    } else {
+                        $query = "UPDATE providers SET RFC='$rfc',comercial_name='$comercial_name',type='$type',phone=$phone, street='$street',suburb='$suburb',number='$number',postal_code=$postal_code,tag='$tag' WHERE id = $id";
+                    }
                     // $query="INSERT INTO providers VALUES(null,'$rfc','$comercial_name','$type',$phone,'$street','$suburb',$number,$postal_code,'$tag')";
-                    $query="UPDATE providers SET RFC='$rfc',comercial_name='$comercial_name',type='$type',phone=$phone,street='$street',suburb='$suburb',number=$number,postal_code=$postal_code,tag='$tag' WHERE id = $id";
-                    var_dump($query);
+                    // $query="UPDATE providers SET RFC='$rfc',comercial_name='$comercial_name',type='$type',phone=$phone,street='$street',suburb='$suburb',number=$number,postal_code=$postal_code,tag='$tag' WHERE id = $id";
                     include 'conexion.php'; //si la pongo por fuera, no funciona :(
                     $query_prepare = $con->prepare($query);
                     if($query_prepare->execute()){
@@ -448,6 +640,57 @@ class providers {
         // var_dump($row);
         
         echo json_encode($row);
+    }
+    public function filterProvider(){
+        include 'conexion.php';
+        if ($_POST) {
+            $filter_per = $_POST['filter'];
+            $filter_type = $_POST['filter_per'];
+            $errores = false;
+            $results = false;
+        
+            $query = "SELECT * FROM providers WHERE $filter_per LIKE '%$filter_type%'";
+            var_dump($query);
+            $query_providers_filter = $con->prepare($query);
+            if($query_providers_filter->execute()){
+                $providers_data = $query_providers_filter->fetchAll(PDO::FETCH_ASSOC);
+                if (count($providers_data)) {
+                    foreach ($providers_data as $index => $providers) {
+                        $codigo_postal = $providers['postal_code'] != 0 ? $providers['postal_code']: '<span class="no_disponible">No disponible</span>';
+                        echo "<tr>";
+                        echo "    <td>".($index + 1)."</td>";
+                        echo "    <td>".$providers['RFC']."</td>";
+                        echo "    <td>".$providers['comercial_name']."</td>";
+                        echo "    <td>".$providers['type']."</td>";
+                        echo "    <td>".$providers['phone']."</td>";
+                        echo "    <td>".$providers['street']."</td>";
+                        echo "    <td>".$providers['suburb']."</td>";
+                        echo "    <td>".$providers['number']."</td>";
+                        echo "    <td>".$codigo_postal."</td>";
+                        echo "    <td>".$providers['tag']."</td>";
+                        echo "    <td style='width:150px;'>";
+                        echo "        <a href='?page=providers&action=newProvider&parameter=".$providers['id']."' class='btn btn-primary'><i class='fas fa-edit'></i></a>";
+                        echo "        <a type='button' data-bs-toggle='modal' data-bs-target='#deleteModal' class='deleteProductData btn btn-danger' data-href='?page=providers&action=getProviderToDelete&id=".$providers['id']."'><i class='fas fa-trash-alt'></i></a>";
+                        echo "    </td>";
+                        echo "</tr>";
+                    }
+                } else {
+                    echo "<tr>";
+                    echo "    <td colspan='11' id='noCoincidencias'>No se encontraron coincidencias</td>";
+                    echo "</tr>";
+                }
+            } else {
+                $errores = true;
+            }
+
+            if (!$errores) {
+                if ($results) {
+                    print_r('No se encontraron coincidencias');
+                }
+            } else {
+                print_r('Algo salio mal');
+            }
+        }
     }
 }
 
@@ -515,7 +758,7 @@ class sales {
             $newdata =  array (
                 'id' => $value['id'],
                 'Producto' => $value['name'],
-                'Precio' => (int)$value['store_price'],
+                'Precio' => (float)$value['store_price'],
                 'Cantidad' => (int)$cant,
                 'Disponibles' => (int)$value['quantity'],
                 'Total' => $total_product,
@@ -532,7 +775,6 @@ class sales {
             if (isset($_POST['action']) && !empty($_POST['action'])) {
                 $action = $_POST['action'];
             }
-            var_dump($action);
             // Actaualiza el credito en el cliente en caso de que la venta sea a credito
             switch ($action) {
                 case 'editSale':
@@ -550,12 +792,12 @@ class sales {
                     if ($cliente && $id_sale && $status && $subtotal) {
                         if ($status && $status == 'credito') {
                             if ($credit) {
-                                $query = "UPDATE clients SET credit_limit = ".$credit." WHERE id = ".$cliente;
+                                $query = "UPDATE clients SET credit_limit = ".(float)$credit." WHERE id = ".$cliente;
                                 $query_prepare = $con->prepare($query);
                                 $query_prepare->execute();
                             }
                         }
-                        $query_sale = $con->prepare("UPDATE sales SET id_client = ".$cliente.", pay_method = '".$status."', subtotal = ".$subtotal.", total = ".$total." WHERE id = ".$id_sale."");
+                        $query_sale = $con->prepare("UPDATE sales SET id_client = ".$cliente.", pay_method = '".$status."', subtotal = ".(float)$subtotal.", total = ".(float)$total." WHERE id = ".$id_sale."");
                         $query_sale->execute();
                     }
 
@@ -579,7 +821,6 @@ class sales {
 
                     break;
                 case 'deleteSale':
-                    var_dump('se esta eliminando');
                     if (isset($_POST['id']) && !empty($_POST['id'])) {
                         $id = $_POST['id'];
                     }
@@ -603,7 +844,9 @@ class sales {
                         $query = "UPDATE clients SET credit_limit = ".$_POST['credit']." WHERE id = ".$_POST['client'];
                         // var_dump($query);
                         $query_prepare = $con->prepare($query);
-                        $query_prepare->execute();
+                        if($query_prepare->execute()){
+                            $flag = true;
+                        }
                     }
 
                     if ($_POST['abonoACredito'] > 0) {
@@ -611,10 +854,12 @@ class sales {
                         $query_client_prepare->execute();
                         $client = $query_client_prepare->fetchAll(PDO::FETCH_ASSOC);
                         foreach ($client as $value) {
-                            $query = "UPDATE clients SET credit_limit = ".(int)$value['credit_limit'] + $_POST['abonoACredito']." WHERE id = ".$_POST['client'];
+                            $query = "UPDATE clients SET credit_limit = ".(float)$value['credit_limit'] + (float)$_POST['abonoACredito']." WHERE id = ".$_POST['client'];
                             // var_dump($query);
                             $query_prepare = $con->prepare($query);
-                            $query_prepare->execute();
+                            if($query_prepare->execute()){
+                                $flag = true;
+                            }
                         }
                     }
                     // Inserta los datos de la venta en la tabla de la venta
@@ -623,10 +868,12 @@ class sales {
                         $cantidad_cliente = $_POST['payFromClient'];
                     }
 
-                    $query_sale = 'INSERT INTO sales VALUES(null,"'.$_POST['folio'].'","'.$_POST['tipoVenta'].'",'.$_POST['client'].','.$_POST['subtotal'].','.$_POST['total'].','.$cantidad_cliente.',"'.$_POST['status'].'",CURRENT_TIME())';
+                    $query_sale = 'INSERT INTO sales VALUES(null,"'.$_POST['folio'].'","'.$_POST['tipoVenta'].'",'.$_POST['client'].','.(float)$_POST['subtotal'].','.(float)$_POST['total'].','.(float)$cantidad_cliente.',"'.$_POST['status'].'",CURRENT_TIME())';
                     // var_dump($query_sale);
                     $query_prepare_sale = $con->prepare($query_sale);
-                    $query_prepare_sale->execute();
+                    if($query_prepare_sale->execute()){
+                        $flag = true;
+                    }
         
                     // Para insertar los productos de la venta
                         // Traer el id de la venta con el folio que esta en proceso
@@ -644,17 +891,20 @@ class sales {
                     foreach ($products as $value) {
                         // var_dump("INSERT INTO sales_products VALUES(null,".$id['id'].",".$value['id'].",".$value['Cantidad'].")");
                         $query_product = $con->prepare("INSERT INTO sales_products VALUES(null,".$id['id'].",".$value['id'].",".$value['Cantidad'].")");
-                        $query_product->execute();
+                        if($query_product->execute()){
+                            $flag = true;
+                        }
         
                         //actualizar cantidad en stock de cada producto
                         // var_dump("UPDATE products SET quantity = ".($value['Disponibles'] - $value['Cantidad'])." WHERE id = ".$value['id']."");
                         $query_product_prepare = $con->prepare("UPDATE products SET quantity = ".($value['Disponibles'] - $value['Cantidad'])." WHERE id = ".$value['id']."");
-                        $query_product_prepare->execute();
-                        $flag = true;
+                        if($query_product_prepare->execute()){
+                            $flag = true;
+                        }
                     }
         
                     if ($flag) {
-                        return true;
+                        print_r('done');
                     }
                     break;
             }
@@ -683,26 +933,26 @@ class sales {
             if (!in_array($sale['folio'], $folio_array)){
                 array_push($folio_array, $sale['folio']);
                 echo "<tr>";
-                echo "    <td>".$index++."</td>";
+                echo "    <td>".($index + 1)."</td>";
                 echo "    <td>".$sale['folio']."</td>";
                 echo "    <td>".$sale['pay_method']."</td>";
                 echo "    <td>".$sale['cliente']."</td>";
-                echo "    <td>".$sale['subtotal']."</td>";
-                echo "    <td>".$sale['total']."</td>";
-                echo "    <td>".$sale['pay_from_client']."</td>";
+                echo "    <td>".(float)$sale['subtotal']."</td>";
+                echo "    <td>".(float)$sale['total']."</td>";
+                echo "    <td>".(float)$sale['pay_from_client']."</td>";
                 echo "    <td>".$sale['status']."</td>";
                 echo "    <td><a class='expand' data-sale='".$sale['id']."'>Ver Productos</a></td>";
                 echo "    <td>".$sale['fecha']."</td>";
                 echo "    <td>";
-                echo "      <a href='?page=sales&action=newSale&parameter=".$sale['id']."' class='btn btn-primary'>Editar</a>";
-                echo "      <a type='button' id='deleteSaleData' onclick='eliminarVenta(".$sale['id'].")' data-bs-toggle='modal' data-bs-target='#deleteModal' class='btn btn-danger'>Eliminar</a>";
+                echo "      <a href='?page=sales&action=newSale&parameter=".$sale['id']."' class='btn btn-primary'><i class='fas fa-eye'></i></a>";
+                echo "      <a type='button' id='deleteSaleData' onclick='eliminarVenta(".$sale['id'].")' data-bs-toggle='modal' data-bs-target='#deleteModal' class='btn btn-danger'><i class='fas fa-trash-alt'></i></a>";
                 echo "    </td>";
                 echo "</tr>";
                 echo "<tr>";
-                echo "    <td colspan='8'>";
+                echo "    <td colspan='11'>";
                 echo "        <div class='table-expandible' id='".$sale['id']."'>";
-                echo "            <table>";
-                echo "                <thead>";
+                echo "            <table class='table table-hover'>";
+                echo "                <thead class='table-dark'>";
                 echo "                    <tr>";
                 echo "                        <th>Producto</th>";
                 echo "                        <th>Cantidad</th>";
@@ -711,7 +961,7 @@ class sales {
                 echo "                <tbody>";
                 foreach ($products_array as $value) {
                     if ($value['0'] == $sale['id']) {
-                        echo "              <tr>";
+                        echo "              <tr rowspan='11'>";
                         echo "                  <td>".$value[1]."</td>";
                         echo "                  <td>".$value[2]."</td>";
                         echo "              </tr>";
@@ -733,7 +983,7 @@ class sales {
 
         $array_productos = [];
         foreach ($products as $index => $row){
-            array_push($array_productos, ['index'=>($index+1), 'sale_id'=>$row['sale_id'], 'id_product'=>$row['id'], 'nombre'=>$row['producto'], 'precio'=>$row['precio'], 'cantidad'=>$row['cantidad'], 'disponibles'=>$row['disponibles'], 'total'=>$row['total']]);
+            array_push($array_productos, ['index'=>($index+1), 'sale_id'=>$row['sale_id'], 'id_product'=>$row['id'], 'nombre'=>$row['producto'], 'precio'=>(float)$row['precio'], 'cantidad'=>$row['cantidad'], 'disponibles'=>$row['disponibles'], 'total'=>(float)$row['total']]);
         }
         $query_prepare = $con->prepare("SELECT * FROM sales WHERE id = $id");
         $query_prepare->execute();
@@ -757,5 +1007,108 @@ class sales {
         // var_dump($id);
         echo json_encode($row);
     }
+    public function salesFilter(){
+        include 'conexion.php';
+        if ($_POST) {
+            $filter_per = $_POST['filter'];
+            $filter_type = $_POST['filter_per'];
+            $errores = false;
+            $results = false;
+            $folio_array = [];
+            $products_array = [];
+            $query_prod = "SELECT sp.sale_id, p.name as 'producto', sp.quantity as 'cantidad' FROM sales_products sp INNER JOIN products p ON p.id = sp.id_product LEFT JOIN sales s ON s.id = sp.sale_id WHERE s.$filter_per like '%$filter_type%'";
+            if ($filter_per === 'cliente') {
+                $filter_per = 'name';
+                $query_prod = "SELECT sp.sale_id, p.name as 'producto', sp.quantity as 'cantidad' FROM sales_products sp  INNER JOIN products p ON p.id = sp.id_product  LEFT JOIN sales s ON s.id = sp.sale_id  LEFT JOIN clients c ON c.id = s.id_client WHERE c.$filter_per like '%$filter_type%'";
+                $filter_per = 'cliente';
+            }
+            $query_products = $con->prepare($query_prod);
+            if($query_products->execute()){
+                $sale_products = $query_products->fetchAll(PDO::FETCH_ASSOC);
+                // Llenar array de productos
+                foreach ($sale_products as $product) {
+                    array_push($products_array, [$product['sale_id'], $product['producto'], $product['cantidad']]);
+                }
+            } else {
+                $errores = true;
+            }
+
+            $query_prod = "SELECT s.id, s.folio, s.pay_method, c.name AS 'cliente', s.subtotal, s.total, s.pay_from_client, s.status, s.fecha FROM sales s INNER JOIN clients c ON c.id = s.id_client WHERE s.$filter_per LIKE '%$filter_type%'";
+            if ($filter_per === 'cliente') {
+                $filter_per = 'name';
+                $query_prod = "SELECT s.id, s.folio, s.pay_method, c.name AS 'cliente', s.subtotal, s.total, s.pay_from_client, s.status, s.fecha FROM sales s INNER JOIN clients c ON c.id = s.id_client WHERE c.$filter_per LIKE '%$filter_type%'";
+                $filter_per = 'cliente';
+            }
+            $query_sale = $con->prepare($query_prod);
+            if($query_sale->execute()){
+                $sales = $query_sale->fetchAll(PDO::FETCH_ASSOC);                    
+                if (count($sales) > 0) {
+                    // Llenar array de folios y tr
+                    foreach ($sales as $index => $sale) {
+                        if (!in_array($sale['folio'], $folio_array)){
+                            array_push($folio_array, $sale['folio']);
+                            echo "<tr>";
+                            echo "    <td>".($index + 1)."</td>";
+                            echo "    <td>".$sale['folio']."</td>";
+                            echo "    <td>".$sale['pay_method']."</td>";
+                            echo "    <td>".$sale['cliente']."</td>";
+                            echo "    <td>".$sale['subtotal']."</td>";
+                            echo "    <td>".$sale['total']."</td>";
+                            echo "    <td>".$sale['pay_from_client']."</td>";
+                            echo "    <td>".$sale['status']."</td>";
+                            echo "    <td><a class='expand' data-sale='".$sale['id']."'>Ver Productos</a></td>";
+                            echo "    <td>".$sale['fecha']."</td>";
+                            echo "    <td>";
+                            echo "      <a href='?page=sales&action=newSale&parameter=".$sale['id']."' class='btn btn-primary'><i class='fas fa-eye'></i></a>";
+                            echo "      <a type='button' id='deleteSaleData' onclick='eliminarVenta(".$sale['id'].")' data-bs-toggle='modal' data-bs-target='#deleteModal' class='btn btn-danger'><i class='fas fa-trash-alt'></i></a>";
+                            echo "    </td>";
+                            echo "</tr>";
+                            echo "<tr>";
+                            echo "    <td colspan='11'>";
+                            echo "        <div class='table-expandible' id='".$sale['id']."'>";
+                            echo "            <table class='table table-hover'>";
+                            echo "                <thead class='table-dark'>";
+                            echo "                    <tr>";
+                            echo "                        <th>Producto</th>";
+                            echo "                        <th>Cantidad</th>";
+                            echo "                    </tr>";
+                            echo "                </thead>";
+                            echo "                <tbody>";
+                            foreach ($products_array as $value) {
+                                if ($value['0'] == $sale['id']) {
+                                    echo "              <tr>";
+                                    echo "                  <td>".$value[1]."</td>";
+                                    echo "                  <td>".$value[2]."</td>";
+                                    echo "              </tr>";
+                                }
+                            }
+                            echo "                </tbody>";
+                            echo "            </table>";
+                            echo "        </div>";
+                            echo "    </td>";
+                            echo "</tr>";
+                        }
+                    }
+                } else {
+                    echo "<tr>";
+                    echo "    <td colspan='11' id='noCoincidencias'>No se encontraron coincidencias</td>";
+                    echo "</tr>";
+                }
+            } else {
+                $errores = true;
+            }
+        } else {
+            $errores = true;
+        }
+
+        if (!$errores) {
+            if ($results) {
+                print_r('No se encontraron coincidencias');
+            }
+        } else {
+            print_r('Algo salio mal');
+        }
+    }
+    
 }
 ?>

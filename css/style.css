@@ -234,6 +234,7 @@ main article #redirecting p{
 #main #products .carousel-productos .card {
     width: 23%!important;
     margin: 0 1% 3% 1%;
+    overflow: hidden;
 }
 
 #successData, #successDataModal, #failData{display: none;}
@@ -253,6 +254,7 @@ form .box-image{
   width: 300px;
   height: 300px;
   position: relative;
+  margin: 40px auto;
 }
 form .box-image:hover::after{
   content: '';
@@ -265,8 +267,16 @@ form #file{display: none;}
 table thead th {
     padding: 10px 0;
 }
-
-
+table.table td[colspan="11"]{
+    padding: 0 !important;
+}
+a.expand {
+    cursor:pointer;
+}
+table.table td#noCoincidencias {
+    padding: 20px!important;
+}
+table {background-color: #fff;}
 .table-expandible {
     height: 0;
     overflow: hidden;
@@ -275,9 +285,10 @@ table thead th {
 .table-expandible.visibleTr{
     height: auto;
     overflow: visible;
+    padding: 20px 0;
 }
 tr td div table {
-    width: 60%;
+    width: 30%!important;
     margin: 20px auto 20px auto;
 }
 
@@ -327,6 +338,9 @@ tr td div table {
     text-align: center;
     user-select: none;
 }
+#payClient-box {
+    margin-top: 40%;
+}
 #payClient-box span {
     color: #7d7d7d;
     font-size: 2.5rem;
@@ -350,11 +364,23 @@ input#user_pay {
     margin-top: 3%;
 }
 
-#newSaleForm div.box {
+#newSaleForm div.box,
+#newProductForm div.box {
     display: flex;
     flex-direction: row;
     flex-wrap: wrap;
     justify-content: space-between
+}
+#newClientForm div.box-content,
+#newProviderForm div.box-content {
+    background-color:white;
+    padding: 20px 40px;
+    margin-top: 20px;
+}
+#newClientForm div.box-content #sendClient {
+    display: inline;
+    width: 10%;
+    margin-left: auto;
 }
 #newSaleForm div.box div.box-content:nth-child(1),
 #newSaleForm div.box div.box-content:nth-child(3){
@@ -367,7 +393,16 @@ input#user_pay {
     width: 58%;
     margin: 0 auto;
 }
-#newSaleForm div.box div.box-content{
+#newProductForm div.box div.box-content:nth-child(1){
+    width: 30%;
+}
+#newProductForm div.box div.box-content:nth-child(2){
+    width: 68%;
+    margin-left: 2%;
+    padding: 30px 50px;
+}
+#newSaleForm div.box div.box-content,
+#newProductForm div.box div.box-content {
     padding: 20px;
     background-color: white;
     border:1px solid #cfcfcf;
@@ -425,6 +460,10 @@ input#user_pay {
 }
 #subtotal-box ~ div {
     padding: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: calc(100% - 116px);
 }
 #subtotal-box ~ div #sale_type {
     margin-bottom: 20px;
@@ -437,9 +476,132 @@ input#user_pay {
 }
 .float-left {float: right;}
 #creditoClient-box,
+#descuentoClient-box,
 #newCreditoClient-box {display: none;}
 #creditoClient-box.active,
+#descuentoClient-box.active,
 #newCreditoClient-box.active {display: block;}
 
-#InfoDataPay,#successDataPay,#failDataPay,#failGeneral{display: none;}
-#InfoDataPay.active,#successDataPay.active,#failDataPay.active,#failGeneral.active{display: block;}
+#InfoDataPay,#successDataPay,#failDataPay,#failGeneral,#failDataImage,#failDataName,#failDataProviderPrice,#failDataProvider,#failDataStorePrice,#failDataQuantity,#failDataName,#failDataEmail,#failDataPhone,#failDataLimit,#failDataDays,#failDataReferencia,#failDataInputTag,#failDataInputStreet,#failDataInputSuburb,#failDataProvider,#failDataInputPostalCode,#failDataInputPhone,#failDataInputType,#failDataInputComercialName,#failDatainputRfc{display: none;}
+#InfoDataPay.active,#successDataPay.active,#failDataPay.active,#failGeneral.active,#failDataImage.active,#failDataName.active,#failDataProviderPrice.active,#failDataProvider.active,#failDataStorePrice.active,#failDataQuantity.active,#failDataName.active,#failDataEmail.active,#failDataPhone.active,#failDataLimit.active,#failDataDays.active,#failDataReferencia.active,#failDataInputTag.active,#failDataInputStreet.active,#failDataInputSuburb.active,#failDataProvider.active,#failDataInputPostalCode.active,#failDataInputPhone.active,#failDataInputType.active,#failDataInputComercialName.active,#failDatainputRfc.active{display: block;}
+
+#filtroFolio{
+    /* width: 40%; */
+    border: none;
+    border-radius: 4px;
+    padding: 5px 10px;
+}
+#filtroTipo,#filtroStatus {
+    padding: 5px 10px;
+    border: none;
+    border-radius: 4px;
+}
+#filtroCliente, #filtrofecha{
+    padding: 5px 10px;
+    border: none;
+    border-radius: 4px;
+}
+#filtroFolio:focus,#filtroTipo:focus,#filtroCliente:focus,#filtrofecha:focus,#filtroStatus:focus {
+    outline:0;
+}
+table thead.table-dark tr {
+    vertical-align: baseline;
+}
+.estatus {margin-top: 40%;}
+td.deleteProduct{display: block;}
+#table-sales-info{margin-top: 5%;}
+.buttons {
+    width: 10%;
+    margin-left: auto;
+}
+.buttons a {
+    display: block;
+    padding: 10px;
+}
+.card-body {
+    border-top: 1px solid rgb(51 51 51 / 22%);
+    padding: 1rem 1rem 0 1rem!important;
+}
+.card-body h5 {
+    text-align: right;
+    text-transform: capitalize;
+}
+.card img {
+    height: 250px;
+}
+.card span.status_info {
+    width: 60%;
+    position: absolute;
+    padding: 5px 10px;
+    top: 8%;
+    right: -10%;
+    font-size: 1.1rem;
+    transform: rotateZ(40deg);
+    font-weight: 500;
+    text-align: center;
+}
+.info_price_name {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content:space-between;
+}
+.info_price_name span {
+    font-size: 1.4rem;
+    font-weight: 600;
+}
+.card-body .action-buttons {
+    margin: 0 -15px;
+    display: flex;
+}
+.card-body .action-buttons a {
+    border-radius: 0;
+    width: 50%;
+}
+.cant_info {
+    text-align: right;
+    padding: 10px 0;
+}
+#options_view {
+    display: inline-flex;
+    flex-direction: row;
+    justify-content:space-between;
+    align-items:center;
+    margin-top:2%;
+    width: 100%;
+}
+#options_view #types_of_view a.list_items {
+    text-decoration: none;
+    color: #b2b2b2;
+    font-size: 1.5rem;
+    padding: 10px 20px;
+    background-color: white;
+    border-radius: 5px;
+    margin: 0 5px;
+    cursor:pointer;
+}
+
+#vista_tarjetas,
+#vista_list {
+    opacity: 0;
+    display:none!important;
+    transition: all .4s;
+}
+#vista_tarjetas.active{
+    opacity: 1;
+    display: flex!important;
+}
+#vista_list.active {
+    opacity: 1;
+    display: block!important;
+}
+#vista_list table td img {
+    width: 50px;
+    height: auto;
+}
+#vista_list table tbody tr{
+    vertical-align: baseline;
+}
+.form-group {
+    margin-bottom: 20px;
+}

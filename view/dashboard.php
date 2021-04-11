@@ -19,8 +19,8 @@
                 <div class="card-body">
                   <h5 class="card-title"><?=$product['name']?></h5>
                   <p class="card-text"><?=$product['store_price']?></p>
-                  <!-- <a href="#" class="btn btn-primary">Editar</a>
-                  <a href="#" class="btn btn-primary">Eliminar</a> -->
+                  <!-- <a href="#" class="btn btn-primary"><i class="fas fa-edit"></i></a>
+                  <a href="#" class="btn btn-primary"><i class="fas fa-trash-alt"></i></a> -->
                 </div>
               </div>
               <?php 

@@ -2,33 +2,34 @@
 <section>
     <h2 id="title" style="margin-bottom:30px;">Tus Ventas</h2>
     <hr>
-    <article>
-        <table class="table table-hover">
+    <a href='?page=sales&action=newSale' style="float:right;" class="btn btn-primary">Nueva Venta</a>
+    <article id="table-sales-info">
+        <table class="table" id="sale_products">
             <thead class="table-dark">
                 <tr>
                     <th>No.</th>
                     <th>
                         <p>Folio</p>
-                        <input type="text" id="filtroFolio">
+                        <input type="text" class="form-control" id="filtroFolio" onkeyup="filtrar('folio')">
                     </th>
                     <th>
                         <p>Tipo</p>
-                        <select name="status" id="filtroTipo">
+                        <select name="status" id="filtroTipo" class="form-select" onchange="filtrar('pay_method')">
                             <option value="">Selecciona...</option>
-                            <option value="credito">Crèdito</option>
+                            <option value="credito">Crédito</option>
                             <option value="contado">Contado</option>
                         </select>
                     </th>
                     <th>
                         <p>Cliente</p>
-                        <input type="text" id="filtroCliente">
+                        <input type="text" class="form-control" id="filtroCliente" onkeyup="filtrar('cliente')">
                     </th>
                     <th>Subtotal</th>
                     <th>Total</th>
                     <th>Pagó con</th>
                     <th>
                         <p>Status</p>
-                        <select name="status" id="filtroStatus">
+                        <select name="status" id="filtroStatus" onchange="filtrar('status')">
                             <option value="">Selecciona...</option>
                             <option value="pendiente">Pendiente</option>
                             <option value="pagada">Pagada</option>
@@ -37,7 +38,7 @@
                     <th>Productos</th>
                     <th>
                         <p>Fecha de creción</p>
-                        <input type="text" id="filtrofecha">
+                        <!-- <input type="text" id="filtrofecha"> -->
                     </th>
                     <th>Acciones</th>
                 </tr>

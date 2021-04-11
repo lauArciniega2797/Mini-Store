@@ -1,7 +1,11 @@
 <?php include 'includes/header.php';?>
     <section>
-        <h2 id="title" style="margin-bottom:30px;"><?= isset($action) && !empty($action) ? 'Editar' : 'Nueva';?> Venta</h2>
+        <h2 id="title" style="margin-bottom:30px;"><?= isset($action) && !empty($action) ? 'Ver' : 'Nueva';?> Venta</h2>
         <hr>
+        <div class="buttons">
+            <a id="senDataSale" style="display:<?=isset($sale) && !empty($sale) ? 'none' : 'block';?>" href="javascript(void)" class="btn btn-primary" data-id="<?=isset($action) && !empty($action) ? $sale[0]['id'] : '';?>" data="<?=isset($action) && !empty($action) ? $action : 'newSale';?>">Guardar Venta</a>
+            <?= isset($sale) && !empty($sale) ? "<a href='?page=sales&action=' class='btn btn-danger'>Regresar</a>" : '';?>
+        </div>
         <div class="alert alert-success" id="successData" role="alert"></div>
         <div class="alert alert-danger" id="failGeneral" role="alert"></div>
         <form id="newSaleForm">
@@ -24,12 +28,12 @@
                     <div class="estatus">
                         <p style="display:<?=isset($sale) && !empty($sale) ? 'block' : 'none' ;?>">Estatus de la venta</p>
                         <div class="form-group">
-                            <p id="sale_status" style="display:<?=isset($sale) && !empty($sale) ? 'block' : 'none' ;?>"><?=isset($sale) && !empty($sale) ? $sale[0]['status'] : '' ;?></p>
+                            <input id="sale_status" type="text" value="<?=isset($sale) && !empty($sale) ? $sale[0]['status'] : '' ;?>" class="form-control" style="display:<?=isset($sale) && !empty($sale) ? 'block' : 'none' ;?>" disabled>
                         </div>
                     </div>
                 </div>
                 <div class="box-content">
-                <div class="alert alert-danger" id="failData" role="alert"></div>
+                    <div class="alert alert-danger" id="failData" role="alert"></div>
                     <div class="select_product_configuration">
                         <div>
                             <label for="inputRfc" class="col-md-6 col-form-label">Producto:</label>
@@ -45,7 +49,7 @@
                             <input type="number" name="cantidadProduct" min=1 value='1' class="form-control" id="inputCantidadProduct" autocomplete="off">
                         </div>
                         <div>
-                            <a href="javascript(void)" class="btn btn-primary addProduct"><i class="fas fa-plus"></i></a>
+                            <a style="display:<?=isset($sale) && !empty($sale) ? 'none' : 'block';?>" href="javascript(void)" class="btn btn-primary addProduct"><i class="fas fa-plus"></i></a>
                         </div>
                     </div>
                     <!-- TABLA CON LOS PRODUCTOS QUE SE VAN AÑADIENDO -->
@@ -58,7 +62,7 @@
                                 <th>Cantidad</th>
                                 <th>Disponibles</th>
                                 <th>Total</th>
-                                <th>Acciones</th>
+                                <th style="display:<?=isset($sale) && !empty($sale) ? 'none' : 'block';?>">Acciones</th>
                             </tr>
                         </thead>
                         <tbody id="CarProduct">
@@ -80,7 +84,7 @@
                                 <td><?=$value['disponibles']?></td>
                                 <td>$<?=$value['total']?></td>
                                 <td>
-                                <a class='btn btn-danger addProduct' onclick='deleteFromCar("<?=$value["index"] - 1 ?>","<?=$value["total"]?>")'><i class="fas fa-trash-alt"></i></a>
+                                <a class='btn btn-danger deleteProduct' onclick='deleteFromCar("<?=$value["index"] - 1 ?>","<?=$value["total"]?>")'><i class="fas fa-trash-alt"></i></a>
                                 </td>
                             </tr>
                     <?php
@@ -93,7 +97,7 @@
                 <div class="box-content">
                     <p id="subtotal-box">
                         Subtotal<br>
-                        <span id="subtotal" data-subtotal="<?= isset($sale) && !empty($sale) ? $sale[0]['subtotal'] : '' ;?>"><?= isset($sale) && !empty($sale) ? $sale[0]['subtotal'] : '$0';?></span>
+                        <span id="subtotal" data-subtotal="<?= isset($sale) && !empty($sale) ? $sale[0]['subtotal'] : '' ;?>"><?= isset($sale) && !empty($sale) ? '$'.$sale[0]['subtotal'] : '$0';?></span>
                     </p>
                     <div>
                         <div id="sale_type">
@@ -106,24 +110,23 @@
                         <p id="creditoClient-box">
                             Crédito del cliente: <b><span id="credit_limit" class="float-left">$0</span></b>
                         </p>
+                        <p id="descuentoClient-box">
+                            Descuento al crédito: <b><span id="desc_to_credit" class="float-left">$0</span></b>
+                        </p>
                         <p id="newCreditoClient-box">
-                            Nuevo crédito del cliente: <b><span id="DescCredit" class="float-left">$0</span></b>
+                            Nuevo saldo: <b><span id="DescCredit" class="float-left">$0</span></b>
                         </p>
                         <p id="totalClient-box">
-                            Total: <b><span data-total="<?= isset($sale) && !empty($sale) ? $sale[0]['total'] : '' ;?>" id="total" class="float-left">$0</span></b></p>
+                            Total: <b><span data-total="" id="total" class="float-left"><?= isset($sale) && !empty($sale) ? '$'.$sale[0]['total'] : '$0' ;?></span></b></p>
                         </p>
                         <p id="payClient-box">
                             Pagó con: <br>
-                            <span>$</span><input type="text" name="pago" id="user_pay" value="0" onchange='payment()'>
+                            <span>$</span><input type="text" name="pago" id="user_pay" value="<?= isset($sale) && !empty($sale) ? $sale[0]['pay_from_client'] : '0' ;?>" onkeyup='payment()' autocomplete=off>
                         </p>
                         <div class="alerts-sale">
                             <div class="alert alert-primary" id="InfoDataPay" role="alert"></div>
                             <div class="alert alert-success" id="successDataPay" role="alert"></div>
                             <div class="alert alert-danger" id="failDataPay" role="alert"></div>
-                        </div>
-                        <div class="buttons">
-                            <a id="senDataSale" href="javascript(void)" class="btn btn-primary" data-id="<?=isset($action) && !empty($action) ? $sale[0]['id'] : '';?>" data="<?=isset($action) && !empty($action) ? $action : 'newSale';?>">Guardar Venta</a>
-                            <?= isset($sale) && !empty($sale) ? "<a href='?page=sales&action=' class='btn btn-danger'>Cancelar</a>" : '';?>
                         </div>
                     </div>
                 </div>
@@ -136,7 +139,7 @@
             <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title" id="staticBackdropLabel">Pago induficiente</h5>
+                        <h5 class="modal-title" id="staticBackdropLabel">Pago insuficiente</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
@@ -153,8 +156,6 @@
     </section>
 
     <script>
-        if (document.getElementById("title").innerHTML == 'Editar Venta') {
-            document.getElementById('selectClient').value = document.getElementById('client').getAttribute('forClient');
-        }
+        
     </script>
 <?php include 'includes/footer.php'?>

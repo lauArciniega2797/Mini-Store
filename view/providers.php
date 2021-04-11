@@ -2,50 +2,63 @@
 // var_dump($providers);
   require_once 'includes/header.php';
 ?>
-<section id="main">
+<section>
     <article>
-        <h1>Tus proveedores</h1>
+        <h2 id="title" style="margin-bottom:30px;">Tus proveedores</h2>
+        <hr>
+        <a href='?page=providers&action=newProvider' style="margin-bottom:20px;float:right;" class="btn btn-primary">Nuevo Proveedor</a>
     </article>
-    <article id="products">
-        <div class="carousel-productos">
-            <table style="width:100%">
-                <thead>
-                    <tr>
-                        <th>No.</th>
-                        <th>RFC</th>
-                        <th>Nombre comercial</th>
-                        <th>Tipo</th>
-                        <th>Teléfono</th>
-                        <th>Calle</th>
-                        <th>Colonia</th>
-                        <th>Numero Exterior</th>
-                        <th>Código Postal</th>
-                        <th>Etiqueta</th>
-                        <th>Acciones</th>
-                    </tr>
-                </thead>
-                <tbody>
-                <?php foreach ($providers as $prov): ?>
-                    <tr>
-                        <td><?=$prov['id']?></td>
-                        <td><?=$prov['RFC']?></td>
-                        <td><?=$prov['comercial_name']?></td>
-                        <td><?=$prov['type']?></td>
-                        <td><?=$prov['phone']?></td>
-                        <td><?=$prov['street']?></td>
-                        <td><?=$prov['suburb']?></td>
-                        <td><?=$prov['number']?></td>
-                        <td><?=$prov['postal_code']?></td>
-                        <td><?=$prov['tag']?></td>
-                        <td><a href="?page=providers&action=newProvider&parameter=<?=$prov['id']?>" class="btn btn-primary">Editar</a>
-                    <!-- Button trigger modal -->
-                    <a type="button" data-bs-toggle="modal" data-bs-target="#deleteModal" class="deleteProductData btn btn-danger" data-href="?page=providers&action=getProviderToDelete&id=<?=$prov['id']?>">Eliminar</a></td>
-                    </tr>
-                <?php endforeach;?>
-                </tbody>
-            </table>
-            <!-- <a href="" class="btn btn-primary" id="productstofinish">Ver mas productos por terminar</a> -->
-        </div>
+    <article>
+        <table class="table table-hover">
+            <thead class="table-dark">
+                <tr>
+                    <th>No.</th>
+                    <th>
+                        <p>RFC</p>
+                        <input type="text" class="form-control" id="filtroRFC" onkeyup="filter_proveedores('RFC')">
+                    </th>
+                    <th>
+                        <p>Nombre comercial</p>
+                        <input type="text" class="form-control" id="filtroComercial" onkeyup="filter_proveedores('comercial_name')">
+                    </th>
+                    <th>
+                        <p>Tipo</p>
+                        <input type="text" class="form-control" id="filtroTipo" onkeyup="filter_proveedores('type')">
+                    </th>
+                    <th>Teléfono</th>
+                    <th>Calle</th>
+                    <th>Colonia</th>
+                    <th>Numero Exterior</th>
+                    <th>Código Postal</th>
+                    <th>
+                        <p>Etiqueta</p>
+                        <input type="text" class="form-control" id="filtroEtiqueta" onkeyup="filter_proveedores('tag')">
+                    </th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody id="table-filter-provider">
+            <?php foreach ($providers as $index => $prov): ?>
+                <tr>
+                    <td><?=($index + 1)?></td>
+                    <td><?=$prov['RFC']?></td>
+                    <td><?=$prov['comercial_name']?></td>
+                    <td><?=$prov['type']?></td>
+                    <td><?=$prov['phone']?></td>
+                    <td><?=$prov['street']?></td>
+                    <td><?=$prov['suburb']?></td>
+                    <td><?=$prov['number']?></td>
+                    <td><?=$prov['postal_code'] != 0 ? $prov['postal_code']: '<span class="no_disponible">No disponible</span>' ?></td>
+                    <td><?=$prov['tag']?></td>
+                    <td style='width:150px;'>
+                        <a href="?page=providers&action=newProvider&parameter=<?=$prov['id']?>" class="btn btn-primary"><i class="fas fa-edit"></i></a>
+                        <!-- Button trigger modal -->
+                        <a type="button" data-bs-toggle="modal" data-bs-target="#deleteModal" class="deleteProductData btn btn-danger" data-href="?page=providers&action=getProviderToDelete&id=<?=$prov['id']?>"><i class="fas fa-trash-alt"></i></a>
+                    </td>
+                </tr>
+            <?php endforeach;?>
+            </tbody>
+        </table>
 
         <!-- Modal -->
         <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
