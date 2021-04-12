@@ -60,8 +60,8 @@
                         <p>Folio: <span id="folioSale"></span></p>
                     </div>
                     <div class="modal-footer">
-                        <a type="button" class="btn btn-secondary" data-bs-dismiss="modal">No quiero :C</a>
-                        <a id="senDataSale" href="" type="button" class="btn btn-primary" data="deleteSale">Si, Eliminar >:|</a>
+                        <a type="button" class="btn btn-secondary" data-bs-dismiss="modal">No quiero <i class="em em-white_frowning_face" aria-role="presentation" aria-label=""></i></a>
+                        <a id="senDataSale" href="" type="button" class="btn btn-primary" data="deleteSale">Si, Eliminar <i class="em em-angry" aria-role="presentation" aria-label="ANGRY FACE"></i></a>
                     </div>
                 </div>
             </div>

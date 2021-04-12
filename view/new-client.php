@@ -4,14 +4,13 @@ require_once 'includes/header.php';
     <section class="container">
     <h2 id="title_product" style="margin-bottom:30px;"><?= isset($action) && !empty($action) ? 'Editar' : 'Nuevo';?> Cliente</h2>
         <hr>
-        <a id="sendClient" href="javascript(void)" class="btn btn-primary" data-id="<?=isset($action) && !empty($action) ? $client['id'] : '';?>" data="<?=isset($action) && !empty($action) ? $action : 'newClient';?>">Guardar</a>
-        <?= isset($client) && !empty($client) ? "<a href='?page=clients&action=' class='btn btn-danger'>Regresar</a>" : '';?>
         <div class="alert alert-success" id="successData" role="alert"></div>
         <div class="alert alert-danger" id="failData" role="alert"></div>
         <form id="newClientForm" enctype="multipart/form-data">
             <div class="box-content">
+                <p class="obligated_camps">Campos obligatorios:  *</p>
                 <div class="form-group">
-                    <label for="inputName" class="col-md-12 col-form-label">Nombre:</label>
+                    <label for="inputName" class="col-md-12 col-form-label"><b>* Nombre:</b></label>
                     <input type="text" name="name" value="<?=isset($client['name']) && !empty($client['name']) ? $client['name'] : '';?>" class="form-control" id="inputName" placeholder="Nombre del cliente" autocomplete="off">
                     <div class="alert alert-danger" id="failDataName" role="alert"></div>
                 </div>
@@ -57,7 +56,8 @@ require_once 'includes/header.php';
                     <input type="text" name="bank_reference" value="<?=isset($client['bank_reference']) && !empty($client['bank_reference']) ? $client['bank_reference'] : '';?>" class="form-control" id="inputBankReference" placeholder="Referencia bancaria" autocomplete="off">
                     <div class="alert alert-danger" id="failDataReferencia" role="alert"></div>
                 </div>
-                
+                <a id="sendClient" href="javascript(void)" class="btn btn-primary" data-id="<?=isset($action) && !empty($action) ? $client['id'] : '';?>" data="<?=isset($action) && !empty($action) ? $action : 'newClient';?>">Guardar</a>
+                <?= isset($client) && !empty($client) ? "<a href='?page=clients&action=' class='btn btn-danger'>Regresar</a>" : '';?>
             </div>
         </form>
     </section>

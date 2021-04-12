@@ -12,6 +12,14 @@ $(document).ready(function(){
             }
         });
     }
+    if ($('#debtors_table').is(':visible')) {
+        $.ajax({
+            url:'?page=debtors&action=showDebtors',
+            success:(response)=>{
+                $('#debtors_table').html(response);
+            }
+        });
+    }
     if ($("#title").html() == 'Ver Venta') {
         document.getElementById('inputPayMethod').value = document.getElementById('tipoVenta').getAttribute('forClient');
         document.getElementById('selectClient').value = document.getElementById('client').getAttribute('forClient');
@@ -156,8 +164,8 @@ $('#sendClient').on('click', function(e) {
     e.preventDefault();
     var actionForm = $(this).attr('data');
     var dataID = $(this).attr('data-id');
-    if (validate_new_client()) {
-        if (actionForm != 'deleteClient') {
+    if (actionForm != 'deleteClient') {
+        if (validate_new_client()) {
             $.ajax({
                 url:'?page=clients&action=saveClient&function='+actionForm+'&id='+dataID,
                 data:$('#newClientForm').serialize(),
@@ -176,27 +184,29 @@ $('#sendClient').on('click', function(e) {
                 }
             })
         } else {
-            $.ajax({
-                url:'?page=clients&action=saveClient',
-                data: {
-                    'function': actionForm,
-                    'id': $(this).attr('href')
-                },
-                type:'POST',
-                success:function(response){
-                    console.log(response);
-                    if (response) {
-                        $('#successDataModal').html('Se ha eliminado el cliente').css({'display':'block'});
-                        // return false;
-                    }
-                    setTimeout(() => {
-                        $('#successDataModal').css({'display':'none'})
-                        $('.btn-close').trigger('click');
-                        location.reload();
-                    }, 3000);
-                }
-            });
+            $('#failData').html('Datos incompletos').css({'display':'block'});
         }
+    } else {
+        $.ajax({
+            url:'?page=clients&action=saveClient',
+            data: {
+                'function': actionForm,
+                'id': $(this).attr('href')
+            },
+            type:'POST',
+            success:function(response){
+                console.log(response);
+                if (response) {
+                    $('#successDataModal').html('Se ha eliminado el cliente').css({'display':'block'});
+                    // return false;
+                }
+                setTimeout(() => {
+                    $('#successDataModal').css({'display':'none'})
+                    $('.btn-close').trigger('click');
+                    location.reload();
+                }, 3000);
+            }
+        });
     }
 })
 $("#flexCheckDefault").on('change', function() {
@@ -220,8 +230,9 @@ $('#senDataProvider').on('click', function(e) {
     e.preventDefault();
     var actionForm = $(this).attr('data');
     var dataID = $(this).attr('data-id');
-    if (validate_new_provider()) {
-        if (actionForm != 'deleteProvider') {
+    if (actionForm != 'deleteProvider') {
+        if (validate_new_provider()) {
+            $('#failData').css({'display':'none'});
             $.ajax({
                 url:'?page=providers&action=saveProvider&function='+actionForm+'&id='+dataID,
                 data:$('#newProviderForm').serialize(),
@@ -237,31 +248,30 @@ $('#senDataProvider').on('click', function(e) {
                 }
             })
         } else {
-            console.log(actionForm);
-            console.log($(this));
-            console.log($(this).attr('href'));
-            $.ajax({
-                url:'?page=providers&action=saveProvider',
-                data: {
-                    'function': actionForm,
-                    'id': $(this).attr('href')
-                },
-                type:'POST',
-                success:function(response){
-                    console.log(response);
-                    if (response) {
-                        $('#successDataModal').html('Se ha eliminado el proveedor');
-                        $('#successDataModal').css({'display':'block'});
-                        // return false;
-                    }
-                    setTimeout(() => {
-                        $('#successDataModal').css({'display':'none'})
-                        $('.btn-close').trigger('click');
-                        location.reload();
-                    }, 3000);
-                }
-            });
+            $('#failData').html('Datos incompletos').css({'display':'block'});
         }
+    } else {
+        $.ajax({
+            url:'?page=providers&action=saveProvider',
+            data: {
+                'function': actionForm,
+                'id': $(this).attr('href')
+            },
+            type:'POST',
+            success:function(response){
+                console.log(response);
+                if (response) {
+                    $('#successDataModal').html('Se ha eliminado el proveedor');
+                    $('#successDataModal').css({'display':'block'});
+                    // return false;
+                }
+                setTimeout(() => {
+                    $('#successDataModal').css({'display':'none'})
+                    $('.btn-close').trigger('click');
+                    location.reload();
+                }, 3000);
+            }
+        });
     }
 })
 
@@ -418,6 +428,7 @@ $('#senDataSale').on('click', function(e){
                         abonoACredito: abonar,
                         payFromClient: (abonar <= 0) ? payFromClient : 0,
                         status: (payFromClient < totalToPay) ? 'Pendiente' : 'Pagada',
+                        cambio:$('#successDataPay').attr('data-change') != '' ? $('#successDataPay').attr('data-change') : '',
                         products: JSON.stringify(array_product) //array de los productos selecionados
                     },
                     success:(response)=>{
@@ -640,7 +651,8 @@ function payment(){
             if (payFromClient >= totalToPay) {
                 $('#InfoDataPay').removeClass('active');
                 $('#failDataPay').removeClass('active');
-                $('#successDataPay').html('Su cambio es de: $'+ (payFromClient - totalToPay)).addClass('active');
+                $('#successDataPay').html('Su cambio es de: $'+ parseFloat(payFromClient - totalToPay)).addClass('active');
+                $('#successDataPay').attr('data-change',payFromClient - totalToPay);
             }
             if(payFromClient < totalToPay && payFromClient > 0 && $('#inputPayMethod option:selected').val() == 'contado') {
                 $('#InfoDataPay').removeClass('active');
@@ -750,12 +762,16 @@ function filter_products(filtro){
         filter_type = $('#filtroProveedor').val();
     } else if(filtro == 'status'){
         if ($('#filtroStatus').val() != '') filter_type = $('#filtroStatus').val();
+    } else if(filtro == 'price'){
+        filter_type = $('#filtroPrecio').val();
+    } else if(filtro == 'quantity'){
+        if ($('#filtroDisponiblesType').val() != '') filter_type = $('#filtroDisponiblesType').val();
     }
 
     $.ajax({
         type:'POST',
         url:'?page=products&action=filterProducts',
-        data:{ filter : filtro, filter_per : filter_type },
+        data:{ filter : filtro, filter_per : filter_type, quantity_filter:$('#filtroDisponibles').val() },
         success:(response)=>{
             $('#table-filter-products').html(response);
         }
@@ -984,7 +1000,8 @@ function validate_new_provider(){
             $('#failDataInputType').html('Ingrese solo letras').addClass('active');
         }
     } else {
-        $('#failDataInputType').html('Ingrese el tipo de empresa').addClass('active');
+        $('#failDataInputType').removeClass('active');
+        all_done_type = true;
     }
     
     if (inputPhone) {
@@ -1068,6 +1085,72 @@ function eliminarVenta(url){
         }
     })
 }
+$(document).on('click','.deleteDataProduct', function(e){
+    eliminarProducto($(e.currentTarget).attr('data-element'));
+})
+function eliminarProducto(url){
+    let arrayObjetoResponse;
+    $.ajax({
+        url:'?page=products&action=getProductToDelete&id='+url,
+        dataType:'json',
+        success:(response) => {
+            arrayObjetoResponse = response;
+            console.log(response);
+            $.each(response, function (indice,valor) {
+                console.log(valor);
+                $('.modal-footer').find('a#senData').prop('href',valor.id);
+                if (valor.image != '') {   
+                    $('#imageProductDelet').attr('src', 'images/'+valor.image);
+                } else {
+                    $('#imageProductDelet').attr('src', 'https://images.unsplash.com/photo-1567039430063-2459256c6f05?ixid=MXwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHw%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=1267&q=80');
+                }
+                $('#imageProductDelet').attr('alt', 'Eunicodin'+valor.name);
+                $('#nameProductDelete').html(valor.name);
+            })
+        }
+    })
+    // return arrayObjetoResponse;
+}
+$(document).on('click','.deleteClientData', function(e){
+    eliminarCliente($(e.currentTarget).attr('data-element'));
+})
+function eliminarCliente(url){
+    $.ajax({
+        url:'?page=clients&action=getClientToDelete&id='+url,
+        dataType:'json',
+        success:(response) => {
+            console.log(response);
+            $.each(response, function (indice,valor) {
+                console.log(valor);
+                $('.modal-footer').find('a#sendClient').prop('href',valor.id);
+                $('#nameClientDelete').html(valor.name);
+                $('#compras_cliente').html(valor.totalCompras);
+                $('#credit_cliente').html('$' + valor.credit_limit);
+            })
+        }
+    })
+}
+$(document).on('click','.deleteProviderData', function(e){
+    eliminarProveedor($(e.currentTarget).attr('data-element'));
+})
+function eliminarProveedor(url){
+    $.ajax({
+        url:'?page=providers&action=getProviderToDelete&id='+url,
+        dataType:'json',
+        success:(response) => {
+            console.log(response);
+            $.each(response, function (indice,valor) {
+                console.log(valor);
+                $('.modal-footer').find('a#senDataProvider').prop('href',valor.id);
+                $('#nameProviderDelete').html(valor.comercial_name);
+                $('#products_provider').html(valor.totalProductsProvider);
+            })
+        }
+    })
+}
+$(document).on('click','.expand-sales', function(e){
+    $('#'+$(e.target).attr('data-debtor')).toggleClass('visibleTr');
+})
 // function onKeyDownHandler(event) {
 //     event.stopPropagation()
 //     var parent = event.target;

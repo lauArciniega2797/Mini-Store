@@ -6,6 +6,7 @@
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/bootstrap.min.css">
     <link rel="stylesheet" href="css/all.css">
+    <link href="https://emoji-css.afeld.me/emoji.css" rel="stylesheet">
 
     <title>Eunicodin</title>
 </head>
@@ -58,9 +59,16 @@
                 <li><a class="dropdown-item" href="?page=providers&action=newProvider">Nuevo Proveedor</a></li>
               </ul>
             </li>
+            <li class="nav-item dropdown">
+              <a class="nav-link" role="button" href="?page=debtors&action=">
+                Deudores
+              </a>
+            </li>
+              
           </ul>
+          
           <div class="user-options">
-            <a class="" href="?page=user&action=closeSesion">Cerrar sesion</a>
+            <a class="nav-link" href="?page=user&action=closeSesion">Cerrar sesion</a>
           </div>
         </div>
       </div>

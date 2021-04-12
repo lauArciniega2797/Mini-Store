@@ -231,30 +231,46 @@ class products{
         }
     }
     public function getProductToDelete(){
+        include 'conexion.php';
         $id="";
         if (isset($_GET['id']) && !empty($_GET['id'])) {
             $id = $_GET['id'];
         }
-        var_dump($id);
-        $query = "SELECT id, name, image FROM products where id=$id";
-        var_dump($query);
-        include 'conexion.php';
-        $query_prepare = $con->prepare($query);
-        $query_prepare->execute();
-        $row = $query_prepare->fetchAll(PDO::FETCH_ASSOC);
-        // var_dump($row);
-        
-        echo json_encode($row);
+        $query_prepare = $con->prepare("SELECT id, name, image FROM products where id=$id");
+        if($query_prepare->execute()){
+            $row = $query_prepare->fetchAll(PDO::FETCH_ASSOC);
+            echo json_encode($row);
+        }
     }
     public function filterProducts(){
         include 'conexion.php';
         if ($_POST) {
             $filter_per = $_POST['filter'];
             $filter_type = $_POST['filter_per'];
+            $quantity = $_POST['quantity_filter'];
             $errores = false;
             $results = false;
 
-            $query = "SELECT * FROM products WHERE $filter_per LIKE '%$filter_type%' ORDER BY name ASC";
+            if ($filter_per == 'quantity') {
+                if (!empty($quantity) && (int)$quantity >= 0) {
+                    if ($filter_type != '') {
+                        $query = "SELECT * FROM products WHERE $filter_per $filter_type $quantity";
+                    } else {
+                        $query = "SELECT * FROM products  ORDER BY name ASC";
+                    }
+                } else {
+                    $query = "SELECT * FROM products  ORDER BY name ASC";
+                }
+            }else if ($filter_per == 'price') {
+                if ((float)$filter_type > 0) {
+                    $query = "SELECT * FROM products WHERE store_price <= ".(float)$filter_type;
+                } else {
+                    $query = "SELECT * FROM products  ORDER BY name ASC";
+                }
+            } else {
+                $query = "SELECT * FROM products WHERE $filter_per LIKE '%$filter_type%' ORDER BY name ASC";
+            }
+            var_dump($query);
             $query_products_filter = $con->prepare($query);
             if($query_products_filter->execute()){
                 $sale_products = $query_products_filter->fetchAll(PDO::FETCH_ASSOC);
@@ -272,10 +288,16 @@ class products{
                         echo "    <td>$ ".$product['price']."</td>";
                         echo "    <td>".$product['procedence_store']."</td>";
                         echo "    <td>".$product['quantity']."</td>";
-                        echo "    <td>".$product['status']."</td>";
+                        if($product['status'] == 'full'){
+                        echo "    <td>Completo</td>";
+                        } else if($product['status'] == 'warning'){
+                        echo "    <td>Por agotarse</td>";
+                        } else {
+                        echo "    <td>Agotado</td>";
+                        }
                         echo "    <td>";
                         echo "        <a href='?page=products&action=newProduct&parameter=".$product['id']."' class='btn btn-primary'><i class='fas fa-edit'></i></a>";
-                        echo "        <a type='button' href='javascript:void(0)' data-bs-toggle='modal' data-bs-target='#deleteProductModal' class='btn btn-danger' onclick='delete_product(".$product['id'].")'><i class='fas fa-trash-alt'></i></a>";
+                        echo "        <a type='button' href='javascript:void(0)' data-bs-toggle='modal' data-bs-target='#deleteProductModal' class='deleteData btn btn-danger' onclick='eliminarProducto(".$product['id'].")'><i class='fas fa-trash-alt'></i></a>";
                         echo "    </td>";
                         echo "</tr>";
                     }
@@ -350,9 +372,9 @@ class clients {
                             $credit_days = $_POST['credit_days'];
                             $credito = 'Aprobado';
                             if (is_null($phone)) {
-                                $query = 'INSERT INTO clients VALUES(null,"'.$name.'","'.$email.'",null,"'.$credito.'",'.$credit_limit.','.$credit_limit.','.$credit_days.',"'.$bank_reference.'")';
+                                $query = 'INSERT INTO clients VALUES(null,"'.$name.'","'.$email.'",null,"'.$credito.'",'.$credit_limit.','.$credit_days.',"'.$bank_reference.'")';
                             } else {
-                                $query = 'INSERT INTO clients VALUES(null,"'.$name.'","'.$email.'",'.$phone.',"'.$credito.'",'.$credit_limit.','.$credit_limit.','.$credit_days.',"'.$bank_reference.'")';
+                                $query = 'INSERT INTO clients VALUES(null,"'.$name.'","'.$email.'",'.$phone.',"'.$credito.'",'.$credit_limit.','.$credit_days.',"'.$bank_reference.'")';
                             }
                             // INSERT INTO clients VALUES(null,'margarita','example@example.com',15467984,0,200,2,1234567890)
                         } else{
@@ -363,6 +385,7 @@ class clients {
                             }
                             // $query = 'INSERT INTO clients VALUES(null,'$name','$email','$phone',null,null,null,'$bank_reference')';
                         }
+                        var_dump($query);
                         $query_prepare = $con->prepare($query);
                         if($query_prepare->execute()){
                             echo 'done';
@@ -387,7 +410,7 @@ class clients {
                         }
                     }
                     if ($no_modified_yet == false) {
-                        $query_comprobe_clients = $con->prepare("SELECT name FROM clients WHERE name LIKE '%$name%'");
+                        $query_comprobe_clients = $con->prepare("SELECT name FROM clients WHERE name = '$name'");
                         if($query_comprobe_clients->execute()){
                             $exist = $query_comprobe_clients->fetchAll(PDO::FETCH_ASSOC);
                             if (count($exist) > 0) {
@@ -450,18 +473,16 @@ class clients {
         }
     }
     public function getClientToDelete(){
+        include 'conexion.php';
         $id="";
         if (isset($_GET['id']) && !empty($_GET['id'])) {
             $id = $_GET['id'];
         }
-        $query = "SELECT id, name FROM clients where id=$id";
-        include 'conexion.php';
-        $query_prepare = $con->prepare($query);
-        $query_prepare->execute();
-        $row = $query_prepare->fetchAll(PDO::FETCH_ASSOC);
-        // var_dump($row);
-        
-        echo json_encode($row);
+        $query_prepare = $con->prepare("SELECT c.id, count(s.id_client) AS 'totalCompras', c.name, c.credit_limit FROM clients c INNER JOIN sales s ON s.id_client = $id WHERE c.id = $id");
+        if($query_prepare->execute()){
+            $row = $query_prepare->fetchAll(PDO::FETCH_ASSOC);
+            echo json_encode($row);
+        }        
     }
     public function filterClients(){
         include 'conexion.php';
@@ -497,13 +518,13 @@ class clients {
                         echo "    <td>".$client['bank_reference']."</td>";
                         echo "    <td>";
                         echo "        <a href='?page=clients&action=newclient&parameter=".$client['id']."' class='btn btn-primary'><i class='fas fa-edit'></i></a>";
-                        echo "        <a type='button' href='javascript:void(0)' data-bs-toggle='modal' data-bs-target='#deleteProductModal' class='btn btn-danger' onclick='delete_product(".$client['id'].")'><i class='fas fa-trash-alt'></i></a>";
+                        echo "        <a type='button' href='javascript:void(0)' data-bs-toggle='modal' data-bs-target='#deleteModalClients' data-element='".$client['id']."' class='deleteClientData btn btn-danger'><i class='fas fa-trash-alt'></i></a>";
                         echo "    </td>";
                         echo "</tr>";
                     }
                 } else {
                     echo "<tr>";
-                    echo "    <td colspan='11' id='noCoincidencias'>No se encontraron coincidencias</td>";
+                    echo "    <td colspan='9' id='noCoincidencias'>No se encontraron coincidencias</td>";
                     echo "</tr>";
                 }
             } else {
@@ -563,11 +584,11 @@ class providers {
                     $tag = $_POST['tag'] != '' ? $_POST['tag'] : '';
 
                     if (is_null($phone)) {
-                        $query = 'INSERT INTO providers VALUES(null,"'.$rfc.'","'.$comercial_name.'","'.$type.'","'.$street.'","'.$suburb.'","'.$number.'",'.$postal_code.',"'.$tag.'")';
+                        $query = 'INSERT INTO providers VALUES(null,"'.$rfc.'","'.$comercial_name.'","'.$type.'",null,"'.$street.'","'.$suburb.'","'.$number.'",'.$postal_code.',"'.$tag.'")';
                     } else {
                         $query = 'INSERT INTO providers VALUES(null,"'.$rfc.'","'.$comercial_name.'","'.$type.'",'.$phone.',"'.$street.'","'.$suburb.'","'.$number.'",'.$postal_code.',"'.$tag.'")';
                     }
-                    
+                    var_dump($query);
                     $query_prepare = $con->prepare($query);
                     if($query_prepare->execute()){
                         echo 'done';
@@ -598,8 +619,9 @@ class providers {
                     }
                     break;
                 case 'deleteProvider':
-                    $query = "DELETE FROM providers WHERE id = $id";
                     include 'conexion.php'; //si la pongo por fuera, no funciona :(
+                    $query = "DELETE FROM providers WHERE id = $id";
+                    var_dump($query);
                     $query_prepare = $con->prepare($query);
                     if($query_prepare->execute()){
                         echo 'done';
@@ -631,15 +653,13 @@ class providers {
         if (isset($_GET['id']) && !empty($_GET['id'])) {
             $id = $_GET['id'];
         }
-        $query = "SELECT id, comercial_name FROM providers where id = $id";
-        var_dump($query);
+        $query = "SELECT pr.id, count(p.id) AS 'totalProductsProvider', pr.comercial_name FROM providers pr INNER JOIN products p ON p.procedence_store = pr.comercial_name WHERE pr.id = $id";
         include 'conexion.php';
         $query_prepare = $con->prepare($query);
-        $query_prepare->execute();
-        $row = $query_prepare->fetchAll(PDO::FETCH_ASSOC);
-        // var_dump($row);
-        
-        echo json_encode($row);
+        if($query_prepare->execute()){
+            $row = $query_prepare->fetchAll(PDO::FETCH_ASSOC);
+            echo json_encode($row);
+        }
     }
     public function filterProvider(){
         include 'conexion.php';
@@ -670,7 +690,7 @@ class providers {
                         echo "    <td>".$providers['tag']."</td>";
                         echo "    <td style='width:150px;'>";
                         echo "        <a href='?page=providers&action=newProvider&parameter=".$providers['id']."' class='btn btn-primary'><i class='fas fa-edit'></i></a>";
-                        echo "        <a type='button' data-bs-toggle='modal' data-bs-target='#deleteModal' class='deleteProductData btn btn-danger' data-href='?page=providers&action=getProviderToDelete&id=".$providers['id']."'><i class='fas fa-trash-alt'></i></a>";
+                        echo "        <a type='button' data-bs-toggle='modal' data-bs-target='#deleteModalProvider' class='deleteProviderData btn btn-danger' data-element='".$providers['id']."'><i class='fas fa-trash-alt'></i></a>";
                         echo "    </td>";
                         echo "</tr>";
                     }
@@ -874,7 +894,11 @@ class sales {
                     if($query_prepare_sale->execute()){
                         $flag = true;
                     }
-        
+                    
+                    $query_payments = $con->prepare("INSERT INTO payments VALUES(NULL, ".$_POST['client'].",'ventas',".(float)$_POST['total'].",null,".(float)$_POST['cambio'].",CURRENT_TIME(),'".$_POST['tipoVenta']."')");
+                    if($query_payments->execute()){
+                        $flag = true;
+                    }
                     // Para insertar los productos de la venta
                         // Traer el id de la venta con el folio que esta en proceso
                             $query_folio_sale = $con->prepare("SELECT id FROM sales WHERE folio = ".$_POST['folio']);
@@ -929,50 +953,56 @@ class sales {
         $sales = $query_sale->fetchAll(PDO::FETCH_ASSOC);
 
         // Llenar array de folios y tr
-        foreach ($sales as $index => $sale) {
-            if (!in_array($sale['folio'], $folio_array)){
-                array_push($folio_array, $sale['folio']);
-                echo "<tr>";
-                echo "    <td>".($index + 1)."</td>";
-                echo "    <td>".$sale['folio']."</td>";
-                echo "    <td>".$sale['pay_method']."</td>";
-                echo "    <td>".$sale['cliente']."</td>";
-                echo "    <td>".(float)$sale['subtotal']."</td>";
-                echo "    <td>".(float)$sale['total']."</td>";
-                echo "    <td>".(float)$sale['pay_from_client']."</td>";
-                echo "    <td>".$sale['status']."</td>";
-                echo "    <td><a class='expand' data-sale='".$sale['id']."'>Ver Productos</a></td>";
-                echo "    <td>".$sale['fecha']."</td>";
-                echo "    <td>";
-                echo "      <a href='?page=sales&action=newSale&parameter=".$sale['id']."' class='btn btn-primary'><i class='fas fa-eye'></i></a>";
-                echo "      <a type='button' id='deleteSaleData' onclick='eliminarVenta(".$sale['id'].")' data-bs-toggle='modal' data-bs-target='#deleteModal' class='btn btn-danger'><i class='fas fa-trash-alt'></i></a>";
-                echo "    </td>";
-                echo "</tr>";
-                echo "<tr>";
-                echo "    <td colspan='11'>";
-                echo "        <div class='table-expandible' id='".$sale['id']."'>";
-                echo "            <table class='table table-hover'>";
-                echo "                <thead class='table-dark'>";
-                echo "                    <tr>";
-                echo "                        <th>Producto</th>";
-                echo "                        <th>Cantidad</th>";
-                echo "                    </tr>";
-                echo "                </thead>";
-                echo "                <tbody>";
-                foreach ($products_array as $value) {
-                    if ($value['0'] == $sale['id']) {
-                        echo "              <tr rowspan='11'>";
-                        echo "                  <td>".$value[1]."</td>";
-                        echo "                  <td>".$value[2]."</td>";
-                        echo "              </tr>";
+        if (count($sales) > 0) {
+            foreach ($sales as $index => $sale) {
+                if (!in_array($sale['folio'], $folio_array)){
+                    array_push($folio_array, $sale['folio']);
+                    echo "<tr>";
+                    echo "    <td>".($index + 1)."</td>";
+                    echo "    <td>".$sale['folio']."</td>";
+                    echo "    <td>".$sale['pay_method']."</td>";
+                    echo "    <td>".$sale['cliente']."</td>";
+                    echo "    <td>".(float)$sale['subtotal']."</td>";
+                    echo "    <td>".(float)$sale['total']."</td>";
+                    echo "    <td>".(float)$sale['pay_from_client']."</td>";
+                    echo "    <td>".$sale['status']."</td>";
+                    echo "    <td><a class='expand' data-sale='".$sale['id']."'>Ver Productos</a></td>";
+                    echo "    <td>".$sale['fecha']."</td>";
+                    echo "    <td>";
+                    echo "      <a href='?page=sales&action=newSale&parameter=".$sale['id']."' class='btn btn-primary'><i class='fas fa-eye'></i></a>";
+                    echo "      <a type='button' id='deleteSaleData' onclick='eliminarVenta(".$sale['id'].")' data-bs-toggle='modal' data-bs-target='#deleteModal' class='btn btn-danger'><i class='fas fa-trash-alt'></i></a>";
+                    echo "    </td>";
+                    echo "</tr>";
+                    echo "<tr>";
+                    echo "    <td colspan='11'>";
+                    echo "        <div class='table-expandible' id='".$sale['id']."'>";
+                    echo "            <table class='table table-hover'>";
+                    echo "                <thead class='table-dark'>";
+                    echo "                    <tr>";
+                    echo "                        <th>Producto</th>";
+                    echo "                        <th>Cantidad</th>";
+                    echo "                    </tr>";
+                    echo "                </thead>";
+                    echo "                <tbody>";
+                    foreach ($products_array as $value) {
+                        if ($value['0'] == $sale['id']) {
+                            echo "              <tr rowspan='11'>";
+                            echo "                  <td>".$value[1]."</td>";
+                            echo "                  <td>".$value[2]."</td>";
+                            echo "              </tr>";
+                        }
                     }
+                    echo "                </tbody>";
+                    echo "            </table>";
+                    echo "        </div>";
+                    echo "    </td>";
+                    echo "</tr>";
                 }
-                echo "                </tbody>";
-                echo "            </table>";
-                echo "        </div>";
-                echo "    </td>";
-                echo "</tr>";
             }
+        } else {
+            echo "<tr>";
+            echo "    <td colspan='11' style='padding:0;margin:0'><div style='margin:0;' class='alert alert-primary col-md-12' role='alert'>Aún no cuentas con ventas</div></td>";
+            echo "</tr>";
         }
     }
     public function getSaleToEdit($id){
@@ -1110,5 +1140,105 @@ class sales {
         }
     }
     
+}
+
+class debtors {
+    public function index(){
+        require_once 'view/debtors.php';
+    }
+    public function showDebtors(){
+        include 'conexion.php';
+        $folio_array = [];
+        $sales_array = [];
+        
+        var_dump("SELECT c.id as 'client', c.name, sum(s.total) as 'totalDeudaClient' FROM sales s INNER JOIN clients c ON c.id = s.id_client where s.status = 'Pendiente' GROUP BY s.id_client");
+        $query_sales_debtors = $con->prepare("SELECT c.id, c.name, sum(s.total) as 'totalDeudaClient' FROM sales s INNER JOIN clients c ON c.id = s.id_client where s.status = 'Pendiente' GROUP BY s.id_client");
+        if($query_sales_debtors->execute()){
+            $sales_debtors = $query_sales_debtors->fetchAll(PDO::FETCH_ASSOC);
+            if (count($sales_debtors) > 0) {
+                foreach ($sales_debtors as $index => $debtor) {
+                    $sales_array = [];
+                    $statusDeuda = '';
+
+                    $query_sales_from_debtor = $con->prepare("SELECT id, folio, subtotal, total, fecha FROM sales WHERE id_client = ".$debtor['id']." AND status = 'Pendiente'");
+                    if($query_sales_from_debtor->execute()){
+                        $sales_debtors_table = $query_sales_from_debtor->fetchAll(PDO::FETCH_ASSOC);
+                        // Llenar array de ventas pertenecientes a los deudores
+                        foreach ($sales_debtors_table as $debtors) {
+                            array_push($sales_array, [$debtors['id'], $debtors['folio'], $debtors['subtotal'], $debtors['total'], $debtors['fecha']]);
+                        }
+                    }
+                
+                    if ((float)$debtor['totalDeudaClient'] > 0) {
+                        $statusDeuda = 'Pendiente';
+                    } else {
+                        $statusDeuda = 'Pagada';
+                    }
+                    echo "<tr>";
+                    echo "    <td>".($index + 1)."</td>";
+                    echo "    <td>".$debtor['name']."</td>";
+                    echo "    <td>$".(float)$debtor['totalDeudaClient']."</td>";
+                    echo "    <td>".$statusDeuda."</td>";
+                    echo "    <td><a class='expand-sales' data-debtor='".$debtor['id']."'>Ver Ventas</a></td>";
+                    echo "    <td><a class='expand-sales' data-debtor='".$debtor['id']."'>Ver Abonos</a></td>";
+                    echo "    <td>";
+                    echo "      <a href='?page=&action=&parameter=".$debtor['id']."' class='btn btn-primary'>Abonar</a>";
+                    echo "      <a type='button' id='deleteDebtorData' onclick='eliminarVenta(".$debtor['id'].")' data-bs-toggle='modal' data-bs-target='#deleteModal' class='btn btn-danger'><i class='fas fa-trash-alt'></i></a>";
+                    echo "    </td>";
+                    echo "</tr>";
+                    echo "<tr>";
+                    echo "    <td colspan='7'>";
+                    echo "        <div class='table-expandible' id='".$debtor['id']."'>";
+                    echo "            <table class='table table-hover'>";
+                    echo "                <thead class='table-dark'>";
+                    echo "                    <tr>";
+                    echo "                        <th>No.</th>";
+                    echo "                        <th>Folio</th>";
+                    echo "                        <th>Subtotal</th>";
+                    echo "                        <th>Total</th>";
+                    echo "                        <th>Fecha</th>";
+                    echo "                    </tr>";
+                    echo "                </thead>";
+                    echo "                <tbody>";
+                    foreach ($sales_array as $index => $value) {
+                        echo "                <tr rowspan='11'>";
+                        echo "                    <td>".($index + 1)."</td>";
+                        echo "                    <td><a href='?page=sales&action=newSale&parameter=".$value[0]."'>".$value[1]."</a></td>";
+                        echo "                    <td>".$value[2]."</td>";
+                        echo "                    <td>".$value[3]."</td>";
+                        echo "                    <td>".$value[4]."</td>";
+                        echo "                </tr>";
+                    }
+                    echo "                </tbody>";
+                    echo "            </table>";
+                    echo "        </div>";
+                    echo "    </td>";
+                    echo "</tr>";
+                }
+            } else {
+                echo "<tr>";
+                echo "    <td colspan='9' style='padding:0;margin:0'><div style='margin:0;' class='alert alert-primary col-md-12' role='alert'>Aún no cuentas con deudas</div></td>";
+                echo "</tr>";
+            }
+        }
+
+        // Llenar array de folios y tr
+    }
+}
+
+class payments {
+    public function index(){
+
+    }
+    public function showPayments(){
+        //cliente  laura
+        //desde    ventas
+        //total    50
+        //abono    10
+        //cambio   4
+        //fecha    hoy
+        //metodo pago credito
+        
+    }
 }
 ?>

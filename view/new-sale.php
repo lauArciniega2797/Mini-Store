@@ -11,12 +11,13 @@
         <form id="newSaleForm">
             <div class="box">
                 <div class="box-content">
+                    <p class="obligated_camps">Campos obligatorios:  *</p>
                     <div class="folio">
                         <p>Folio de la venta:</p>
                         <input type="text" id="folio" value="<?= isset($sale[0]['folio']) && !empty($sale[0]['folio']) ? $sale[0]['folio'] : '000'.((int)$count[0]['COUNT(*)'] == 0 ? 1 : (int)$count[0]['COUNT(*)'] + 1);?>" disabled>
                     </div>
                     <div class="clientes">
-                        <label forClient="<?=isset($sale) && !empty($sale) ? $sale[0]['id_client'] : '';?>" id="client" class="col-md-12 col-form-label">Selecciona un cliente:</label>
+                        <label forClient="<?=isset($sale) && !empty($sale) ? $sale[0]['id_client'] : '';?>" id="client" class="col-md-12 col-form-label"><b>* Selecciona un cliente:</b></label>
                         <select id="selectClient" class="form-select" aria-label="Default select example">
                             <option selected>Selecciona...</option>
                             <?php foreach ($clients as $cl): ?>
@@ -36,7 +37,7 @@
                     <div class="alert alert-danger" id="failData" role="alert"></div>
                     <div class="select_product_configuration">
                         <div>
-                            <label for="inputRfc" class="col-md-6 col-form-label">Producto:</label>
+                            <label for="inputRfc" class="col-md-6 col-form-label"><b>* Producto:</b></label>
                             <select id="selectProduct" class="form-select col-md-6" aria-label="Default select example">
                                 <option selected>Selecciona...</option>
                                 <?php foreach ($products as $pr): ?>
@@ -45,7 +46,7 @@
                             </select>
                         </div>
                         <div>
-                            <label for="cantidadProduct" class="col-md-6 col-form-label">Cantidad:</label>
+                            <label for="cantidadProduct" class="col-form-label"><b>* Cantidad:</b></label>
                             <input type="number" name="cantidadProduct" min=1 value='1' class="form-control" id="inputCantidadProduct" autocomplete="off">
                         </div>
                         <div>
@@ -120,13 +121,13 @@
                             Total: <b><span data-total="" id="total" class="float-left"><?= isset($sale) && !empty($sale) ? '$'.$sale[0]['total'] : '$0' ;?></span></b></p>
                         </p>
                         <p id="payClient-box">
-                            Pagó con: <br>
+                            <b>* Pagó con:</b> <br>
                             <span>$</span><input type="text" name="pago" id="user_pay" value="<?= isset($sale) && !empty($sale) ? $sale[0]['pay_from_client'] : '0' ;?>" onkeyup='payment()' autocomplete=off>
                         </p>
                         <div class="alerts-sale">
                             <div class="alert alert-primary" id="InfoDataPay" role="alert"></div>
                             <div class="alert alert-success" id="successDataPay" role="alert"></div>
-                            <div class="alert alert-danger" id="failDataPay" role="alert"></div>
+                            <div class="alert alert-danger" id="failDataPay" data-change="" role="alert"></div>
                         </div>
                     </div>
                 </div>

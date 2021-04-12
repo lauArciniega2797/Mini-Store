@@ -1,6 +1,6 @@
 • Seccion de productos
  - Nuevo producto *------- DONE ---------*
- - Editar y eliminar (Si edita, pero no quiere eliminar)
+ - Editar y eliminar *------- DONE ---------*
  - Todos los productos *------- DONE ---------*
  - Filtrar productos *------- DONE ---------*
 

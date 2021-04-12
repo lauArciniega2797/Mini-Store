@@ -4,9 +4,9 @@
 ?>
 <section>
     <article>
-        <h2 id="title" style="margin-bottom:30px;">Pagos de los clientes</h2>
+        <h2 id="title" style="margin-bottom:30px;">Tus Clientes</h2>
         <hr>
-        <a href='?page=clients&action=newClient' style="float:right;" class="btn btn-primary">Nuevo Pago</a>
+        <a href='?page=clients&action=newClient' style="float:right;" class="btn btn-primary">Nuevo Cliente</a>
         <br><br>
     </article>
     <article id="products" style="margin-top:30px">
@@ -15,28 +15,27 @@
                 <tr>
                     <th>No.</th>
                     <th>
-                        <p>Cliente</p>
-                        <input type="text" class="form-control" id="filtroNombre" onkeyup="">
+                        <p>Nombre</p>
+                        <input type="text" class="form-control" id="filtroNombre" onkeyup="filter_clients('name')">
                     </th>
                     <th>
-                        <p>Desde</p>
-                        <select name="status" id="filtroCredito" class="form-select" onchange="">
-                            <option value="">Selecciona...</option>
-                            <option value="ventas">Ventas</option>
-                            <option value="deudas">Deudores</option>
-                        </select>
+                        <p>E-mail</p>
+                        <input type="text" class="form-control" id="filtroEmail" onkeyup="filter_clients('email')">
                     </th>
-                    <th>Total</th>
-                    <th>Abono</th>
-                    <th>Cambio</th>
-                    <th>Fecha</th>
+                    <th>Teléfono</th>
                     <th>
-                        <p>Metodo de pago</p>
-                        <select name="status" id="filtroCredito" class="form-select" onchange="">
+                        <p>Crédito</p>
+                        <select name="status" id="filtroCredito" class="form-select" onchange="filter_clients('approved_credit')">
                             <option value="">Selecciona...</option>
                             <option value="0">Aprobado</option>
                             <option value="1">Rechazado</option>
                         </select>
+                    </th>
+                    <th>Limite de crédito</th>
+                    <th>Días de crédito</th>
+                    <th>
+                        <p>Referencia bancaria</p>
+                        <input type="text" class="form-control" id="filtroBankReference" onkeyup="filter_clients('bank_reference')">
                     </th>
                     <th>Acciones</th>
                 </tr>
