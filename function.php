@@ -883,9 +883,35 @@ class sales {
                         }
                     }
                     // Inserta los datos de la venta en la tabla de la venta
-                    $cantidad_cliente = 0;
+                    $cantidad_cliente = 0;$query_create_debtor = '';
                     if ($_POST['payFromClient'] > 0) {
                         $cantidad_cliente = $_POST['payFromClient'];
+                    } else if($_POST['payFromClient'] <= 0 && $_POST['status'] == 'Pendiente') {
+                        $exist_debtro = $con->prepare("SELECT id_client, total_debt, abonos FROM debtors WHERE id_client = ".$_POST['client']);
+                        if($exist_debtro->execute()){
+                            $exist = $exist_debtro->fetchAll(PDO::FETCH_ASSOC);
+                            if (count($exist) <= 0) { //no hay deudores con ese id de cliente, procede a crear un nuevo deudor
+                                $query_debt_client = $con->prepare("SELECT sum(total) AS 'TotalDebtClient' FROM sales WHERE id_client = ".$_POST['client']." AND status = 'Pendiente'");
+                                if ($query_debt_client->execute()) {
+                                    $total_debt_client = $query_debt_client->fetchAll(PDO::FETCH_ASSOC);
+                                    foreach ($total_debt_client as $value) {
+                                        var_dump($value);
+                                        $nueva_deuda = (float)$value['TotalDebtClient'] + (float)$_POST['total'];
+                                        $query_create_debtor = "INSERT INTO debtors VALUES(NULL, ".$_POST['client'].", ".$nueva_deuda.",".$nueva_deuda.")";
+                                        var_dump("INSERT INTO debtors VALUES(NULL, ".$_POST['client'].", ".$nueva_deuda.",".$nueva_deuda.")");
+                                    }
+                                }
+                            } else {//ya existe el cliente en la tabla
+                                foreach ($exist as $value) {
+                                    $query_create_debtor = "UPDATE debtors SET total_debt = ".(float)$value['total_debt'] + (float)$_POST['total'].", restant_debt = ".(float)$value['total_debt'] + (float)$_POST['total'] - (float)$value['abonos']." WHERE id = ".$_POST['client'];
+                                }
+                            }
+                        }
+                    }
+                    // var_dump($query_create_debtor);
+                    $query_table_debtor = $con->prepare($query_create_debtor);
+                    if ($query_table_debtor->execute()) {
+                        $flag = true;
                     }
 
                     $query_sale = 'INSERT INTO sales VALUES(null,"'.$_POST['folio'].'","'.$_POST['tipoVenta'].'",'.$_POST['client'].','.(float)$_POST['subtotal'].','.(float)$_POST['total'].','.(float)$cantidad_cliente.',"'.$_POST['status'].'",CURRENT_TIME())';
@@ -895,10 +921,10 @@ class sales {
                         $flag = true;
                     }
                     
-                    $query_payments = $con->prepare("INSERT INTO payments VALUES(NULL, ".$_POST['client'].",'ventas',".(float)$_POST['total'].",null,".(float)$_POST['cambio'].",CURRENT_TIME(),'".$_POST['tipoVenta']."')");
-                    if($query_payments->execute()){
-                        $flag = true;
-                    }
+                    // $query_payments = $con->prepare("INSERT INTO payments VALUES(NULL, ".$_POST['client'].",'ventas',".(float)$_POST['total'].",null,CURRENT_TIME(),'".$_POST['tipoVenta']."')");
+                    // if($query_payments->execute()){
+                    //     $flag = true;
+                    // }
                     // Para insertar los productos de la venta
                         // Traer el id de la venta con el folio que esta en proceso
                             $query_folio_sale = $con->prepare("SELECT id FROM sales WHERE folio = ".$_POST['folio']);
@@ -1151,8 +1177,7 @@ class debtors {
         $folio_array = [];
         $sales_array = [];
         
-        var_dump("SELECT c.id as 'client', c.name, sum(s.total) as 'totalDeudaClient' FROM sales s INNER JOIN clients c ON c.id = s.id_client where s.status = 'Pendiente' GROUP BY s.id_client");
-        $query_sales_debtors = $con->prepare("SELECT c.id, c.name, sum(s.total) as 'totalDeudaClient' FROM sales s INNER JOIN clients c ON c.id = s.id_client where s.status = 'Pendiente' GROUP BY s.id_client");
+        $query_sales_debtors = $con->prepare("SELECT c.id, c.name, sum(s.total) as 'totalDeudaClient', d.restant_debt, d.abonos FROM sales s INNER JOIN clients c ON c.id = s.id_client RIGHT JOIN debtors d ON d.id_client = c.id where s.status = 'Pendiente' GROUP BY s.id_client");
         if($query_sales_debtors->execute()){
             $sales_debtors = $query_sales_debtors->fetchAll(PDO::FETCH_ASSOC);
             if (count($sales_debtors) > 0) {
@@ -1178,12 +1203,12 @@ class debtors {
                     echo "    <td>".($index + 1)."</td>";
                     echo "    <td>".$debtor['name']."</td>";
                     echo "    <td>$".(float)$debtor['totalDeudaClient']."</td>";
+                    echo "    <td>$".(float)$debtor['restant_debt']."</td>";
+                    echo "    <td>$".(float)$debtor['abonos']."</td>";
                     echo "    <td>".$statusDeuda."</td>";
                     echo "    <td><a class='expand-sales' data-debtor='".$debtor['id']."'>Ver Ventas</a></td>";
-                    echo "    <td><a class='expand-sales' data-debtor='".$debtor['id']."'>Ver Abonos</a></td>";
                     echo "    <td>";
-                    echo "      <a href='?page=&action=&parameter=".$debtor['id']."' class='btn btn-primary'>Abonar</a>";
-                    echo "      <a type='button' id='deleteDebtorData' onclick='eliminarVenta(".$debtor['id'].")' data-bs-toggle='modal' data-bs-target='#deleteModal' class='btn btn-danger'><i class='fas fa-trash-alt'></i></a>";
+                    echo "      <a href='?page=payments&action=newPayment' class='btn btn-primary'>Abonar</a>";
                     echo "    </td>";
                     echo "</tr>";
                     echo "<tr>";
@@ -1217,7 +1242,7 @@ class debtors {
                 }
             } else {
                 echo "<tr>";
-                echo "    <td colspan='9' style='padding:0;margin:0'><div style='margin:0;' class='alert alert-primary col-md-12' role='alert'>Aún no cuentas con deudas</div></td>";
+                echo "    <td colspan='9' style='padding:0;margin:0'><div style='margin:0;' class='alert alert-primary col-md-12' role='alert'>Aún no cuentas con deudores</div></td>";
                 echo "</tr>";
             }
         }
@@ -1228,17 +1253,129 @@ class debtors {
 
 class payments {
     public function index(){
+        $payments = $this->showPayments();
+        require_once 'view/payments.php';
+    }
+    public function newPayment(){
+        $clients = new clients();
+        $payments_clients = $clients->getClients();
 
+        require_once 'view/new-payment.php';
+    }
+    public function selectDataDebtors() {
+        include 'conexion.php';
+        $id = '';
+        if (isset($_POST['id']) && !empty($_POST['id'])) {
+            $id = $_POST['id'];
+        }
+        $query_debt = $con->prepare("SELECT total_debt, restant_debt, abonos from debtors where id = ".$id);
+        if($query_debt->execute()){
+            $row = $query_debt->fetchAll(PDO::FETCH_ASSOC);
+            echo json_encode($row);
+        }
     }
     public function showPayments(){
-        //cliente  laura
-        //desde    ventas
-        //total    50
-        //abono    10
-        //cambio   4
-        //fecha    hoy
-        //metodo pago credito
-        
+        include 'conexion.php';
+        $query = $con->prepare("SELECT c.name, p.total, p.abono, p.pay_method ,p.concepto, p.date FROM payments p INNER JOIN clients c ON c.id = p.id_client");
+        if($query->execute()){
+            $query_show = $query->fetchAll(PDO::FETCH_ASSOC);
+            return $query_show;
+        }
+    }
+    public function savePayment(){
+        include 'conexion.php';
+        if ($_POST) {
+            var_dump($_POST);
+            $flag = false; $flag_sale = false;
+            $cliente_id = $_POST['client'];
+            $concepto = $_POST['concepto'];
+            $abono = !empty($_POST['abono']) ? $_POST['abono'] : 0;
+            $deuda_actual = $_POST['deuda_actual'];
+            $pay_method = $_POST['pay_method'];
+            $restante = $_POST['restant'];
+            $restante_updated = ((float)$restante - (float)$abono) <= 0 ? 0 : ((float)$restante - (float)$abono);
+
+            var_dump("INSERT INTO payments VALUES(null, ".$cliente_id.",".$deuda_actual.",".$abono.",'".$pay_method."','".$concepto."', CURRENT_TIME())");
+            $query_inset_payment = $con->prepare("INSERT INTO payments VALUES(null, ".$cliente_id.",".$deuda_actual.",".$abono.",'".$pay_method."','".$concepto."', CURRENT_TIME())");
+            if($query_inset_payment->execute()){
+                if ($restante - $abono <= 0) {
+                    var_dump("SELECT abonos FROM debtors WHERE id_client = ".$cliente_id);
+                    $total_abono_debtor = $con->prepare("SELECT abonos FROM debtors WHERE id_client = ".$cliente_id);
+                    if($total_abono_debtor->execute()){
+                        foreach ($total_abono_debtor as $value) {
+                            var_dump("UPDATE debtors SET restant_debt = ".$restante_updated.", abonos = ".((float)$value['abonos'] + (float)$abono).", status = 'Pagada'  WHERE id_client = ".$cliente_id);
+                            $query_update_dubters = $con->prepare("UPDATE debtors SET restant_debt = ".$restante_updated.", abonos = ".((float)$value['abonos'] + (float)$abono).", status = 'Pagada'  WHERE id_client = ".$cliente_id);
+                            if($query_update_dubters->execute()) {
+                                $flag = true;
+                            }
+                            var_dump("UPDATE sales SET status = 'Pagada' WHERE id_client = ".$cliente_id);
+                            $query_update_sales = $con->prepare("UPDATE sales SET status = 'Pagada' WHERE id_client = ".$cliente_id);
+                            if($query_update_sales->execute()){
+                                $flag_sale = true;
+                            }
+                        }
+                    }
+                } else {
+                    var_dump("SELECT abonos FROM debtors WHERE id_client = ".$cliente_id);
+                    $total_abono_debtor = $con->prepare("SELECT abonos FROM debtors WHERE id_client = ".$cliente_id);
+                    if($total_abono_debtor->execute()){
+                        foreach ($total_abono_debtor as $value) {
+                            var_dump("UPDATE debtors SET restant_debt = ".$restante_updated.", abonos = ".((float)$value['abonos'] + (float)$abono)." WHERE id_client = ".$cliente_id);
+                            $query_update_dubters = $con->prepare("UPDATE debtors SET restant_debt = ".$restante_updated.", abonos = ".((float)$value['abonos'] + (float)$abono)." WHERE id_client = ".$cliente_id);
+                            if($query_update_dubters->execute()) {
+                                $flag = true;
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (($flag && $flag_sale) || $flag) {
+                print_r('done');
+            }
+        }
+    }
+    public function filterPayments(){
+        include 'conexion.php';
+        if ($_POST) {
+            $filter_per = $_POST['filter'];
+            $filter_type = $_POST['filter_per'];
+            $errores = false;
+            $results = false;
+
+            $query = "SELECT c.name, p.total, p.abono, p.pay_method ,p.concepto, p.date FROM payments p INNER JOIN clients c ON c.id = p.id_client WHERE $filter_per LIKE '%$filter_type%'";
+            $query_payments_filter = $con->prepare($query);
+            if($query_payments_filter->execute()){
+                $payments_data = $query_payments_filter->fetchAll(PDO::FETCH_ASSOC);
+                if (count($payments_data)) {
+                    foreach ($payments_data as $index => $payment) {
+                        echo "<tr>";
+                        echo "    <td>".($index + 1)."</td>";
+                        echo "    <td>".$payment['name']."</td>";
+                        echo "    <td>".$payment['total']."</td>";
+                        echo "    <td>".$payment['abono']."</td>";
+                        echo "    <td>".$payment['pay_method']."</td>";
+                        echo "    <td>".$payment['concepto']."</td>";
+                        echo "    <td>".$payment['date']."</td>";
+                        echo "</tr>";
+                    }
+                } else {
+                    echo "<tr>";
+                    echo "    <td colspan='8' id='noCoincidencias'>No se encontraron coincidencias</td>";
+                    echo "</tr>";
+                }
+            } else {
+                $errores = true;
+            }
+
+            if (!$errores) {
+                if ($results) {
+                    print_r('No se encontraron coincidencias');
+                }
+            } else {
+                print_r('Algo salio mal');
+            }
+        }
     }
 }
 ?>

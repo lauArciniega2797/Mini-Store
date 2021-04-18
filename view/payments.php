@@ -1,77 +1,63 @@
 <?php
-// var_dump($clienos);
   require_once 'includes/header.php';
 ?>
 <section>
     <article>
-        <h2 id="title" style="margin-bottom:30px;">Tus Clientes</h2>
+        <h2 id="title" style="margin-bottom:30px;">Historial de Pagos</h2>
         <hr>
-        <a href='?page=clients&action=newClient' style="float:right;" class="btn btn-primary">Nuevo Cliente</a>
+        <a href='?page=payments&action=newPayment' style="float:right;" class="btn btn-primary">Nuevo Pago</a>
         <br><br>
     </article>
     <article id="products" style="margin-top:30px">
         <table class="table table-hover">
             <thead class="table-dark">
                 <tr>
-                    <th>No.</th>
+                <th>No.</th>
                     <th>
-                        <p>Nombre</p>
-                        <input type="text" class="form-control" id="filtroNombre" onkeyup="filter_clients('name')">
+                        <p>Cliente</p>
+                        <input type="text" class="form-control" id="filtroNombre" onkeyup="filter_pagos('name')">
                     </th>
+                    <th>Total</th>
+                    <th>Abono</th>
                     <th>
-                        <p>E-mail</p>
-                        <input type="text" class="form-control" id="filtroEmail" onkeyup="filter_clients('email')">
-                    </th>
-                    <th>Teléfono</th>
-                    <th>
-                        <p>Crédito</p>
-                        <select name="status" id="filtroCredito" class="form-select" onchange="filter_clients('approved_credit')">
+                        <p>Metodo de pago</p>
+                        <select name="status" id="filtroPayMethod" class="form-select" onchange="filter_pagos('pay_method')">
                             <option value="">Selecciona...</option>
-                            <option value="0">Aprobado</option>
-                            <option value="1">Rechazado</option>
+                            <option value="contado">Contado</option>
+                            <option value="deposito">Transferencia bancaria</option>
                         </select>
                     </th>
-                    <th>Limite de crédito</th>
-                    <th>Días de crédito</th>
-                    <th>
-                        <p>Referencia bancaria</p>
-                        <input type="text" class="form-control" id="filtroBankReference" onkeyup="filter_clients('bank_reference')">
-                    </th>
-                    <th>Acciones</th>
+                    <th>Concepto</th>
+                    <th>Fecha</th>
                 </tr>
             </thead>
-            <tbody id="table-filter-clients">
-            <?php if (count($client) > 0): ?>
-                <?php foreach ($client as $index => $clien): ?>
+            <tbody id="table-filter-payments">
+            <?php if (count($payments) > 0): ?>
+                <?php foreach ($payments as $index => $payment): ?>
                     <tr>
                         <td><?=($index + 1)?></td>
-                        <td><?=$clien['name']?></td>
-                        <td><?=$clien['email']?></td>
-                        <td><?=$clien['phone']?></td>
-                        <td><?=$clien['approved_credit']?></td>
-                        <td><?=$clien['credit_limit']?></td>
-                        <td><?=$clien['credit_days']?></td>
-                        <td><?=$clien['bank_reference']?></td>
-                        <td>
-                            <a href="?page=clients&action=newClient&parameter=<?=$clien['id']?>" class="btn btn-primary"><i class="fas fa-edit"></i></a>
-                            <a type="button" data-bs-toggle="modal" data-bs-target="#deleteModalClients" data-element='<?=$clien['id']?>' class="deleteClientData btn btn-danger"><i class="fas fa-trash-alt"></i></a>
-                        </td>
+                        <td><?=$payment['name']?></td>
+                        <td><?=$payment['total']?></td>
+                        <td><?=$payment['abono']?></td>
+                        <td><?=$payment['pay_method']?></td>
+                        <td><?=$payment['concepto']?></td>
+                        <td><?=$payment['date']?></td>
                     </tr>
                 <?php endforeach;?>
             <?php else:?>
                 <tr>
-                    <td colspan="9" style="padding:0;margin:0"><div style="margin:0;" class="alert alert-primary col-md-12" role="alert">Aún no cuentas con clientes</div></td>
+                    <td colspan="9" style="padding:0;margin:0"><div style="margin:0;" class="alert alert-primary col-md-12" role="alert">Aún no cuentas con pagos</div></td>
                 </tr>
             <?php endif;?>
             </tbody>
         </table>
 
         <!-- Modal -->
-        <div class="modal fade" id="deleteModalClients" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal fade" id="deleteModalPayments" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
             <div class="modal-dialog">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title" id="exampleModalLabel">¿Deseas eliminar este cliente?</h5>
+                        <h5 class="modal-title" id="exampleModalLabel">¿Deseas eliminar este pago?</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">

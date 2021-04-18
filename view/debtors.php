@@ -20,12 +20,10 @@
                         <p>Total Deuda</p>
                         <!-- <input type="text" class="form-control" id="filtroPrecio" onkeyup=""> -->
                     </td>
+                    <td>Restante</td>
+                    <td>Total abonos</td>
                     <td>Ventas al cliente</td>
                     <td>Estatus</td>
-                    <td>
-                        <p>Abonos del cliente</p>
-                        <!-- <input type="text" class="form-control" id="filtroProveedor" onkeyup="filter_products('procedence_store')"> -->
-                    </td>
                     <td>Acciones</td>
                 </tr>
             </thead>

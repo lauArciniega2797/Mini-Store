@@ -158,7 +158,6 @@ $('#senData').on('click', function(e){
         });
     }
 })
-
 /* ---------- INSERT CLIENT ON DATABASE ----------  */
 $('#sendClient').on('click', function(e) {
     e.preventDefault();
@@ -259,7 +258,6 @@ $('#senDataProvider').on('click', function(e) {
             },
             type:'POST',
             success:function(response){
-                console.log(response);
                 if (response) {
                     $('#successDataModal').html('Se ha eliminado el proveedor');
                     $('#successDataModal').css({'display':'block'});
@@ -435,9 +433,9 @@ $('#senDataSale').on('click', function(e){
                         if (response) {
                             $('#successData').html('los datos se guardaron correctamente');
                             $('#successData').css({'display':'block'});
-                            setTimeout(() => {
-                                window.location.href = '?page=sales&action=';
-                            }, 3000);
+                            // setTimeout(() => {
+                            //     window.location.href = '?page=sales&action=';
+                            // }, 3000);
                         }
                     }
                 })
@@ -819,6 +817,24 @@ function filter_proveedores(filtro){
         }
     })
 }
+function filter_pagos(filtro){
+    let filter_type = '';
+    if (filtro == 'name') {
+        filter_type = $('#filtroNombre').val();
+    } else if (filtro == 'desde') {
+        if ($('#filtroFrom').val() != '') filter_type = $('#filtroFrom').val();
+    } else if(filtro == 'pay_method'){
+        if ($('#filtroPayMethod').val() != '') filter_type = $('#filtroPayMethod').val();
+    }
+    $.ajax({
+        type:'POST',
+        url:'?page=payments&action=filterPayments',
+        data:{ filter : filtro, filter_per : filter_type },
+        success:(response)=>{
+            $('#table-filter-payments').html(response);
+        }
+    })
+}
 //Validacion nuevo producto
 function validate_new_product(){
     let all_done_name = false, all_done_providerP = false, all_done_provider = false, all_done_price = false, all_done_quantity = false;
@@ -1048,6 +1064,50 @@ function validate_new_provider(){
         return true;
     }
 }
+function validate_new_payment(){
+    let all_done_concept = false, all_done_abono = false, all_done_client = false, all_done_pay_method = false;
+    let concept = $('#inputConcepto').val() != '' ?  $('#inputConcepto').val() : false;
+    let client = $('#client_payments_select option:selected').val() != '' ? $('#client_payments_select option:selected').val(): false;
+    let abono = $('#user_abono').val() != '' ?  $('#user_abono').val() : false;
+    let pay_method = $('#pay_method_select option:selected').val() != 'Selecciona...' ? $('#pay_method_select option:selected').val(): false;
+        
+    if (concept) {
+        $('#failDataConcepto').removeClass('active')
+        all_done_concept = true;
+    } else {
+        $('#failDataConcepto').removeClass('active')
+        all_done_concept = true;
+    }
+    
+    if (client) {
+        $('#failData').removeClass('active');
+        all_done_client = true;
+    } else {
+        $('#failData').html('Seleccione un cliente para continuar').addClass('active');
+    }
+
+    if (pay_method) {
+        $('#failData').removeClass('active');
+        all_done_pay_method = true;
+    } else {
+        $('#failDataMetodo').html('Seleccione un método de pago para continuar').addClass('active');
+    }
+    
+    if (abono && !$('#user_abono').is(':disabled') && parseFloat(abono) > 0) {
+        if(validate_input_number(abono)) {
+            $('#failDataClientPay').removeClass('active')
+            all_done_abono = true;
+        }else {
+            $('#failDataClientPay').html('Ingrese solo numeros').addClass('active');
+        }
+    } else {
+        $('#failDataClientPay').html('Ingrese monto a abonar').addClass('active');
+    }
+
+    if (all_done_abono && all_done_concept && all_done_client && all_done_pay_method) {
+        return true;
+    }
+}
 function validate_input_string(texto){
     var regex = /^[a-zA-Z ]+$/;
     return regex.test(texto);
@@ -1150,6 +1210,83 @@ function eliminarProveedor(url){
 }
 $(document).on('click','.expand-sales', function(e){
     $('#'+$(e.target).attr('data-debtor')).toggleClass('visibleTr');
+})
+$('.input-number-validate').on('keyup', function(){
+    if (validate_input_number($(this).val())) {
+        $('#failDataClientPay').removeClass('active');
+    } else {
+        $('#failDataClientPay').html('ingrese solo numeros').addClass('active');
+    }
+})
+$('#senDataPayment').on('click', function(e){
+    e.preventDefault();
+    if ($('#initial_debt').html() != '$0') {
+        $('#failData').css({'display':'none'});
+        if (validate_new_payment()) {
+            $.ajax({
+                type:'POST',
+                url:'?page=payments&action=savePayment',
+                data:{
+                    concepto:$('#inputConcepto').val() != '' ? $('#inputConcepto').val() : '',
+                    abono:parseFloat($('#user_abono').val()),
+                    client:$('#client_payments_select option:selected').val(),
+                    deuda_actual:parseFloat($('#initial_debt').html().split('$')[1]),
+                    pay_method:$('#pay_method_select option:selected').val(),
+                    restant:parseFloat($('#restant_debt').html().split('$')[1]),
+                },
+                success:(response)=>{
+                    if (response) {
+                        $('#successData').html('Los datos se guardaron correctamente');
+                        $('#successData').css({'display':'block'});
+                        // return false;
+                    }
+                    setTimeout(() => {
+                        $('#successData').css({'display':'none'});
+                        window.location.href = '?page=payments&action=';
+                    }, 3000);
+                }
+            })
+        }
+    } else {
+        $('#failData').html('El cliente no es deudor, seleccione otro cliente').css({'display':'block'});
+    }
+})
+$('#client_payments_select').on('change', function(){
+    if($('#client_payments_select option:selected').val() != ''){
+        $('#failData').css({'display':'none'});
+        let id_client = $("#client_payments_select option:selected").attr('value');
+        $.ajax({
+            url:'?page=payments&action=selectDataDebtors&id=',
+            type:'POST',
+            data:{id:id_client},
+            dataType:'json',
+            success:(response) => {
+                console.log(response);
+                // {total_debt: "404.00", restant_debt: "354.00"}
+                if(response.length > 0){
+                    $('#inputConcepto').attr('disabled',false);
+                    $('#user_abono').attr('disabled',false);
+                    $('#pay_method_select').attr('disabled',false);
+                    response.forEach(element => {
+                        if (element.total_debt != '') {
+                            $('#initial_debt').html('$'+element.total_debt);
+                            $('#total_abono').html('$'+element.abonos);
+                            $('#restant_debt').html('$'+element.restant_debt);
+                        }
+                    });
+                } else {
+                    $('#inputConcepto').attr('disabled',true);
+                    $('#user_abono').attr('disabled',true);
+                    $('#pay_method_select').attr('disabled',true);
+                    $('#initial_debt').html('$0');
+                    $('#total_abono').html('$0');
+                    $('#restant_debt').html('$0');
+                }
+            }
+        })
+    } else {
+        $('#failData').html('Seleccione un cliente para continuar').css({'display':'block'});
+    }
 })
 // function onKeyDownHandler(event) {
 //     event.stopPropagation()

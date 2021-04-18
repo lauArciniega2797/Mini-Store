@@ -345,7 +345,8 @@ tr td div table {
     color: #7d7d7d;
     font-size: 2.5rem;
 }
-input#user_pay {
+input#user_pay,
+input#user_abono{
     border-bottom: 3px solid #ced4da;
     border-left: none;
     border-right: none;
@@ -482,8 +483,8 @@ input#user_pay {
 #descuentoClient-box.active,
 #newCreditoClient-box.active {display: block;}
 
-#InfoDataPay,#successDataPay,#failDataPay,#failGeneral,#failDataImage,#failDataName,#failDataProviderPrice,#failDataProvider,#failDataStorePrice,#failDataQuantity,#failDataName,#failDataEmail,#failDataPhone,#failDataLimit,#failDataDays,#failDataReferencia,#failDataInputTag,#failDataInputStreet,#failDataInputSuburb,#failDataProvider,#failDataInputPostalCode,#failDataInputPhone,#failDataInputType,#failDataInputComercialName,#failDatainputRfc{display: none;}
-#InfoDataPay.active,#successDataPay.active,#failDataPay.active,#failGeneral.active,#failDataImage.active,#failDataName.active,#failDataProviderPrice.active,#failDataProvider.active,#failDataStorePrice.active,#failDataQuantity.active,#failDataName.active,#failDataEmail.active,#failDataPhone.active,#failDataLimit.active,#failDataDays.active,#failDataReferencia.active,#failDataInputTag.active,#failDataInputStreet.active,#failDataInputSuburb.active,#failDataProvider.active,#failDataInputPostalCode.active,#failDataInputPhone.active,#failDataInputType.active,#failDataInputComercialName.active,#failDatainputRfc.active{display: block;}
+#InfoDataPay,#successDataPay,#failDataPay,#failGeneral,#failDataImage,#failDataName,#failDataProviderPrice,#failDataProvider,#failDataStorePrice,#failDataQuantity,#failDataName,#failDataEmail,#failDataPhone,#failDataLimit,#failDataDays,#failDataReferencia,#failDataInputTag,#failDataInputStreet,#failDataInputSuburb,#failDataProvider,#failDataInputPostalCode,#failDataInputPhone,#failDataInputType,#failDataInputComercialName,#failDatainputRfc,#failDataConcepto,#failDataClientPay, #failDataMetodo{display: none;}
+#InfoDataPay.active,#successDataPay.active,#failDataPay.active,#failGeneral.active,#failDataImage.active,#failDataName.active,#failDataProviderPrice.active,#failDataProvider.active,#failDataStorePrice.active,#failDataQuantity.active,#failDataName.active,#failDataEmail.active,#failDataPhone.active,#failDataLimit.active,#failDataDays.active,#failDataReferencia.active,#failDataInputTag.active,#failDataInputStreet.active,#failDataInputSuburb.active,#failDataProvider.active,#failDataInputPostalCode.active,#failDataInputPhone.active,#failDataInputType.active,#failDataInputComercialName.active,#failDatainputRfc.active,#failDataConcepto.active,#failDataClientPay.active,#failDataMetodo.active{display: block;}
 
 #filtroFolio{
     /* width: 40%; */
@@ -634,4 +635,22 @@ td.deleteProduct{display: block;}
 }
 #debtors_table td[colspan="7"] {
     padding: 0 !important;
+}
+.dataClientPayments {
+    display: flex;
+    flex-direction: column;
+    margin: 50px 0;
+}
+.dataClientPayments span {
+    font-size: 2.5rem;
+    font-weight: 300;
+}
+#abonoClient-box {
+    margin: 10% 0px 0 0;
+}
+a#senDataPayment {
+    margin: 20px 0 0 0;
+    display: block;
+    width: 20%;
+    margin-left: auto;
 }

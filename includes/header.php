@@ -64,7 +64,15 @@
                 Deudores
               </a>
             </li>
-              
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" id="navbarDropdownMenuLink" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                Pagos
+              </a>
+              <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                <li><a class="dropdown-item" href="?page=payments&action=">Pagos</a></li>
+                <li><a class="dropdown-item" href="?page=payments&action=newPayment">Nuevo Pago</a></li>
+              </ul>
+            </li>
           </ul>
           
           <div class="user-options">

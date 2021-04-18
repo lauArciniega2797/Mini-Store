@@ -39,3 +39,6 @@
  - usuario, solo ve productos y el contacto
 
 • INOVADOR es que el usuario pueda comprar en el sitio. Tiene que estar en un hosting para que el usuario pueda ver el sitio.
+
+
+al hacer la venta, el pago debe irse a la tabla de pagos, pero debe de indicar que vino desde las ventas

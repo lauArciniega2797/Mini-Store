@@ -122,12 +122,13 @@
                         </p>
                         <p id="payClient-box">
                             <b>* Pagó con:</b> <br>
-                            <span>$</span><input type="text" name="pago" id="user_pay" value="<?= isset($sale) && !empty($sale) ? $sale[0]['pay_from_client'] : '0' ;?>" onkeyup='payment()' autocomplete=off>
+                            <span>$</span><input type="text" class="input-number-validate" name="pago" id="user_pay" value="<?= isset($sale) && !empty($sale) ? $sale[0]['pay_from_client'] : '0' ;?>" onkeyup='payment()' autocomplete=off>
+                            <div class="alert alert-danger" id="failDataClientPay" role="alert"></div>
                         </p>
                         <div class="alerts-sale">
                             <div class="alert alert-primary" id="InfoDataPay" role="alert"></div>
-                            <div class="alert alert-success" id="successDataPay" role="alert"></div>
-                            <div class="alert alert-danger" id="failDataPay" data-change="" role="alert"></div>
+                            <div class="alert alert-success" id="successDataPay" data-change="" role="alert"></div>
+                            <div class="alert alert-danger" id="failDataPay" role="alert"></div>
                         </div>
                     </div>
                 </div>
