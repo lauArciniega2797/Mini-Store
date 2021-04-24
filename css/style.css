@@ -528,7 +528,7 @@ td.deleteProduct{display: block;}
     text-transform: capitalize;
 }
 .card img {
-    height: 250px;
+    height: 350px;
 }
 .card span.status_info {
     width: 60%;
@@ -587,6 +587,14 @@ td.deleteProduct{display: block;}
     opacity: 0;
     display:none!important;
     transition: all .4s;
+}
+#vista_tarjetas{
+    flex-wrap: wrap;
+}
+#vista_tarjetas .card {
+    width: 24% !important;
+    margin: 20px .5%;
+    overflow: hidden;
 }
 #vista_tarjetas.active{
     opacity: 1;
@@ -653,4 +661,24 @@ a#senDataPayment {
     display: block;
     width: 20%;
     margin-left: auto;
+}
+.owl-carousel .owl-item img {
+    height: 100%!important;
+    width: 100%!important;
+}
+.product_blog_cont {
+    background-color: white;
+    padding:20px;
+}
+.owl-nav {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+}
+.owl-nav .owl-prev, 
+.owl-nav .owl-next {
+    width: 50px;
+    height: 50px;
+    background-color: white!important;
+    font-size: 2rem!important;
 }

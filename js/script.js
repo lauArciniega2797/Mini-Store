@@ -12,6 +12,25 @@ $(document).ready(function(){
             }
         });
     }
+    if ($('.dashboard').is(':visible')) {
+        var owl = $(".owl-carousel");
+        owl.owlCarousel({
+            margin: 10,
+            nav: true,
+            loop: true,
+            responsive: {
+                0: {
+                    items: 1,
+                },
+                600: {
+                    items: 2,
+                },
+                1000: {
+                    items: 3,
+                },
+            },
+        });
+    }
     if ($('#debtors_table').is(':visible')) {
         $.ajax({
             url:'?page=debtors&action=showDebtors',
@@ -424,7 +443,7 @@ $('#senDataSale').on('click', function(e){
                         subtotal: parseFloat($('#subtotal').html().split('$')[1]), // total de la venta
                         total: parseFloat($('#total').html().split('$')[1]), // total de la venta
                         abonoACredito: abonar,
-                        payFromClient: (abonar <= 0) ? payFromClient : 0,
+                        payFromClient: payFromClient,
                         status: (payFromClient < totalToPay) ? 'Pendiente' : 'Pagada',
                         cambio:$('#successDataPay').attr('data-change') != '' ? $('#successDataPay').attr('data-change') : '',
                         products: JSON.stringify(array_product) //array de los productos selecionados
@@ -433,9 +452,9 @@ $('#senDataSale').on('click', function(e){
                         if (response) {
                             $('#successData').html('los datos se guardaron correctamente');
                             $('#successData').css({'display':'block'});
-                            // setTimeout(() => {
-                            //     window.location.href = '?page=sales&action=';
-                            // }, 3000);
+                            setTimeout(() => {
+                                window.location.href = '?page=sales&action=';
+                            }, 3000);
                         }
                     }
                 })
@@ -1162,7 +1181,7 @@ function eliminarProducto(url){
                 if (valor.image != '') {   
                     $('#imageProductDelet').attr('src', 'images/'+valor.image);
                 } else {
-                    $('#imageProductDelet').attr('src', 'https://images.unsplash.com/photo-1567039430063-2459256c6f05?ixid=MXwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHw%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=1267&q=80');
+                    $('#imageProductDelet').attr('src', 'https://images.unsplash.com/photo-1454789548928-9efd52dc4031?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1000&q=80');
                 }
                 $('#imageProductDelet').attr('alt', 'Eunicodin'+valor.name);
                 $('#nameProductDelete').html(valor.name);
@@ -1288,6 +1307,14 @@ $('#client_payments_select').on('change', function(){
         $('#failData').html('Seleccione un cliente para continuar').css({'display':'block'});
     }
 })
+
+//para el ticket
+$(document).on('click','.downloadTicket', (e)=>{
+    let id_sale = $(e.currentTarget).attr('data-id');
+    let folio_sale = $(e.currentTarget).attr('data-folio');
+    console.log('?page=sales&action=dataToTicket&id='+id_sale+'&folio='+folio_sale);
+    window.location.href = '?page=sales&action=dataToTicket&id='+id_sale+'&folio='+folio_sale;
+})
 // function onKeyDownHandler(event) {
 //     event.stopPropagation()
 //     var parent = event.target;
@@ -1321,7 +1348,7 @@ $('#client_payments_select').on('change', function(){
 //             //     if (valor.image != '') {   
 //             //         $('#imageProductDelet').attr('src', 'images/'+valor.image);
 //             //     } else {
-//             //         $('#imageProductDelet').attr('src', 'https://images.unsplash.com/photo-1567039430063-2459256c6f05?ixid=MXwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHw%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=1267&q=80');
+//             //         $('#imageProductDelet').attr('src', 'https://images.unsplash.com/photo-1454789548928-9efd52dc4031?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1000&q=80');
 //             //     }
 //             //     $('#imageProductDelet').attr('alt', 'Eunicodin'+valor.name);
 //             //     $('#nameProductDelete').html(valor.name);

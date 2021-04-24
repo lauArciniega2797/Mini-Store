@@ -6,6 +6,7 @@
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/bootstrap.min.css">
     <link rel="stylesheet" href="css/all.css">
+    <link rel="stylesheet" href="css/owl.carousel.min.css">
     <link href="https://emoji-css.afeld.me/emoji.css" rel="stylesheet">
 
     <title>Eunicodin</title>
@@ -25,24 +26,6 @@
             </li>
             <li class="nav-item dropdown">
               <a class="nav-link dropdown-toggle" id="navbarDropdownMenuLink" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                Ventas
-              </a>
-              <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
-                <li><a class="dropdown-item" href="?page=sales&action=">Ventas</a></li>
-                <li><a class="dropdown-item" href="?page=sales&action=newSale">Nueva venta</a></li>
-              </ul>
-            </li>
-            <li class="nav-item dropdown">
-              <a class="nav-link dropdown-toggle" id="navbarDropdownMenuLink" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                Productos
-              </a>
-              <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
-                <li><a class="dropdown-item" href="?page=products&action=">Produtos</a></li>
-                <li><a class="dropdown-item" href="?page=products&action=newProduct">Nuevo producto</a></li>
-              </ul>
-            </li>
-            <li class="nav-item dropdown">
-              <a class="nav-link dropdown-toggle" id="navbarDropdownMenuLink" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                 Clientes
               </a>
               <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
@@ -57,6 +40,24 @@
               <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
                 <li><a class="dropdown-item" href="?page=providers&action=">Proveedores</a></li>
                 <li><a class="dropdown-item" href="?page=providers&action=newProvider">Nuevo Proveedor</a></li>
+              </ul>
+            </li>
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" id="navbarDropdownMenuLink" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                Productos
+              </a>
+              <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                <li><a class="dropdown-item" href="?page=products&action=">Produtos</a></li>
+                <li><a class="dropdown-item" href="?page=products&action=newProduct">Nuevo producto</a></li>
+              </ul>
+            </li>
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" id="navbarDropdownMenuLink" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                Ventas
+              </a>
+              <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                <li><a class="dropdown-item" href="?page=sales&action=">Ventas</a></li>
+                <li><a class="dropdown-item" href="?page=sales&action=newSale">Nueva venta</a></li>
               </ul>
             </li>
             <li class="nav-item dropdown">

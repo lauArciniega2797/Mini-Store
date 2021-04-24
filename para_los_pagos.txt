@@ -1,0 +1,24 @@
+cuando una venta se queda pendiente, el cliente se vuelve deudor.
+
+En la deuda, quiero saber
+ - nombre del cliente
+ - total de la deuda
+ - restante de la deuda
+ - cantidad total de abonos
+ - estatus de la deuda (finalizada o pendiente)
+
+Desde la vista de deudores, se puede crear un nuevo abono, ver las ventas relacionadas a la deuda de ese cliente y los abonos que ha realizado(pagos)
+
+Pagos, es solo para llevar el control de las deudas, para saber quien le pago y asi.
+
+En el nuevo pago, quiero saber
+ - Quien es el cliente
+ - Cuanto es lo que debe
+ - De cuanto es el abono
+ - Concepto del abono
+ - metodo de pago
+ - fecha de pago
+
+Al crear un nuevo pago, se tiene que actualizar la deuda. 
+
+Si el restante de la deuda es cero, entonces las ventas pendientes de ese cliente se transformaran en deudas pagadas y el estatus de la deuda pasara a ser pagada tambien.

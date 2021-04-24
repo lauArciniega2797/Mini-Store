@@ -195,7 +195,7 @@ class products{
         return $row;
     }
     public function getProductsToFinish(){
-        $query = "SELECT * FROM products where status = 'warning'";
+        $query = "SELECT * FROM products where status = 'warning' or status = 'empty'";
         include 'conexion.php';
         $query_prepare = $con->prepare($query);
         $query_prepare->execute();
@@ -279,7 +279,7 @@ class products{
                         echo "<tr>";
                         echo "    <td>".($index + 1)."</td>";
                         if ($product['image'] == '') {
-                            echo "    <td><img height='50px' src='https://images.unsplash.com/photo-1567039430063-2459256c6f05?ixid=MXwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHw%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=1267&q=80' class='card-img-top' alt='Eunicodin'></td>";
+                            echo "    <td><img height='50px' src='https://images.unsplash.com/photo-1454789548928-9efd52dc4031?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1000&q=80' class='card-img-top' alt='Eunicodin'></td>";
                         } else {
                             echo "    <td><img height='50px' src='images/".$product['image']."' class='card-img-top' alt='Eunicodin'></td>";
                         }
@@ -884,38 +884,57 @@ class sales {
                     }
                     // Inserta los datos de la venta en la tabla de la venta
                     $cantidad_cliente = 0;$query_create_debtor = '';
-                    if ($_POST['payFromClient'] > 0) {
+                    var_dump($_POST['payFromClient']);
+                    var_dump($_POST['status']);
+                    if ($_POST['payFromClient'] > 0 && $_POST['status'] == 'Pagada') {
+                        var_dump('si pago el cliente');
                         $cantidad_cliente = $_POST['payFromClient'];
-                    } else if($_POST['payFromClient'] <= 0 && $_POST['status'] == 'Pendiente') {
-                        $exist_debtro = $con->prepare("SELECT id_client, total_debt, abonos FROM debtors WHERE id_client = ".$_POST['client']);
+                    } else if(($_POST['payFromClient'] <= 0 && $_POST['status'] == 'Pendiente') || ($_POST['payFromClient'] > 0 && $_POST['status'] == 'Pendiente')) {
+                        var_dump('no pago el cliente');
+                        $exist_debtro = $con->prepare("SELECT id_client, total_debt,restant_debt, abonos FROM debtors WHERE id_client = ".$_POST['client']);
                         if($exist_debtro->execute()){
                             $exist = $exist_debtro->fetchAll(PDO::FETCH_ASSOC);
                             if (count($exist) <= 0) { //no hay deudores con ese id de cliente, procede a crear un nuevo deudor
+                                var_dump("SELECT sum(total) AS 'TotalDebtClient' FROM sales WHERE id_client = ".$_POST['client']." AND status = 'Pendiente'");
                                 $query_debt_client = $con->prepare("SELECT sum(total) AS 'TotalDebtClient' FROM sales WHERE id_client = ".$_POST['client']." AND status = 'Pendiente'");
                                 if ($query_debt_client->execute()) {
                                     $total_debt_client = $query_debt_client->fetchAll(PDO::FETCH_ASSOC);
                                     foreach ($total_debt_client as $value) {
-                                        var_dump($value);
-                                        $nueva_deuda = (float)$value['TotalDebtClient'] + (float)$_POST['total'];
-                                        $query_create_debtor = "INSERT INTO debtors VALUES(NULL, ".$_POST['client'].", ".$nueva_deuda.",".$nueva_deuda.")";
-                                        var_dump("INSERT INTO debtors VALUES(NULL, ".$_POST['client'].", ".$nueva_deuda.",".$nueva_deuda.")");
+                                        $nueva_deuda = 0;
+                                        if ((float)$_POST['total'] - (float)$_POST['payFromClient'] > 0) {
+                                            $nueva_deuda = (float)$value['TotalDebtClient'] + ((float)$_POST['total'] - (float)$_POST['payFromClient']);
+                                        } else {
+                                            $nueva_deuda = (float)$value['TotalDebtClient'] + (float)$_POST['total'];
+                                        }
+                                        $query_create_debtor = "INSERT INTO debtors(id_client,total_debt,restant_debt) VALUES(".$_POST['client'].",".$nueva_deuda.",".$nueva_deuda.")";
+                                        var_dump("INSERT INTO debtors(id_client,total_debt,restant_debt) VALUES(".$_POST['client'].",".$nueva_deuda.",".$nueva_deuda.")");
                                     }
                                 }
                             } else {//ya existe el cliente en la tabla
                                 foreach ($exist as $value) {
-                                    $query_create_debtor = "UPDATE debtors SET total_debt = ".(float)$value['total_debt'] + (float)$_POST['total'].", restant_debt = ".(float)$value['total_debt'] + (float)$_POST['total'] - (float)$value['abonos']." WHERE id = ".$_POST['client'];
+                                    if ((float)$_POST['total'] - (float)$_POST['payFromClient'] > 0) {
+                                        $query_create_debtor = "UPDATE debtors SET total_debt = ".(float)$value['total_debt'] + ((float)$_POST['total'] - (float)$_POST['payFromClient']).", restant_debt = ".(float)$value['restant_debt'] + ((float)$_POST['total'] - (float)$_POST['payFromClient'])." WHERE id = ".$_POST['client'];
+                                    } else {
+                                        $query_create_debtor = "UPDATE debtors SET total_debt = ".(float)$value['total_debt'] + (float)$_POST['total'].", restant_debt = ".(float)$value['restant_debt'] + (float)$_POST['total']." WHERE id = ".$_POST['client'];
+                                    }
                                 }
                             }
                         }
-                    }
-                    // var_dump($query_create_debtor);
-                    $query_table_debtor = $con->prepare($query_create_debtor);
-                    if ($query_table_debtor->execute()) {
-                        $flag = true;
+                        if ((float)$_POST['total'] - (float)$_POST['payFromClient'] > 0) {
+                            $cantidad_cliente = $_POST['payFromClient'];
+                        } else {
+                            $cantidad_cliente = 0;
+                        }
+
+                        var_dump($query_create_debtor);
+                        $query_table_debtor = $con->prepare($query_create_debtor);
+                        if ($query_table_debtor->execute()) {
+                            $flag = true;
+                        }
                     }
 
                     $query_sale = 'INSERT INTO sales VALUES(null,"'.$_POST['folio'].'","'.$_POST['tipoVenta'].'",'.$_POST['client'].','.(float)$_POST['subtotal'].','.(float)$_POST['total'].','.(float)$cantidad_cliente.',"'.$_POST['status'].'",CURRENT_TIME())';
-                    // var_dump($query_sale);
+                    var_dump($query_sale);
                     $query_prepare_sale = $con->prepare($query_sale);
                     if($query_prepare_sale->execute()){
                         $flag = true;
@@ -997,6 +1016,7 @@ class sales {
                     echo "    <td>";
                     echo "      <a href='?page=sales&action=newSale&parameter=".$sale['id']."' class='btn btn-primary'><i class='fas fa-eye'></i></a>";
                     echo "      <a type='button' id='deleteSaleData' onclick='eliminarVenta(".$sale['id'].")' data-bs-toggle='modal' data-bs-target='#deleteModal' class='btn btn-danger'><i class='fas fa-trash-alt'></i></a>";
+                    echo "      <a type='button' data-id='".$sale['id']."', data-folio='".$sale['folio']."' class='downloadTicket btn btn-secondary'><i class='far fa-file-pdf'></i></a>";
                     echo "    </td>";
                     echo "</tr>";
                     echo "<tr>";
@@ -1165,7 +1185,131 @@ class sales {
             print_r('Algo salio mal');
         }
     }
-    
+    public function dataToTicket(){
+        include 'conexion.php';
+        $flag_sales = false;$flag_products = false;$products_info=[];$sales_info=[];$folio_Sale='';$method='';$client='';$subtotal='';$total='';$pago_cliente='';$fecha='';
+        // array(4) { ["page"]=> string(5) "sales" ["action"]=> string(12) "dataToTicket" ["id"]=> string(1) "1" ["folio"]=> string(4) "0001" }
+        if((isset($_GET['id']) && !empty($_GET['id'])) && isset($_GET['folio']) && !empty($_GET['folio'])){
+            // var_dump($_GET['folio']);
+            $id =  $_GET['id'];
+            $folio =  $_GET['folio'];
+            $query_sales_info = $con->prepare("SELECT c.name,s.folio,s.pay_method,s.subtotal,s.total,s.pay_from_client,s.fecha FROM sales s INNER JOIN clients c ON c.id = s.id_client WHERE folio = $folio");
+            if($query_sales_info->execute()){
+                $flag_sales = true;
+                $sales_information = $query_sales_info->fetchAll(PDO::FETCH_ASSOC);
+            }
+            // var_dump($sales_info);
+            $query_products_info = $con->prepare("SELECT p.name,sp.quantity,p.store_price,(p.store_price*sp.quantity) AS 'Total' FROM sales_products sp INNER JOIN products p ON p.id = sp.id_product WHERE sale_id = $id");
+            if($query_products_info->execute()){
+                $flag_products = true;
+                $products_information = $query_products_info->fetchAll(PDO::FETCH_ASSOC);
+            }
+            if ($flag_products && $flag_sales) {
+                $client = '';$folio_Sale = '';$method = '';$subtotal = '';$total = '';$pago_cliente = '';$fecha = '';
+                foreach ($sales_information as $value) {
+                    $client = $value['name'];
+                    $folio_Sale = $value['folio'];
+                    $method = $value['pay_method'];
+                    $subtotal = (float)$value['subtotal'];
+                    $total = (float)$value['total'];
+                    $pago_cliente = (float)$value['pay_from_client'];
+                    $fecha = $value['fecha'];
+                }
+                // var_dump($client);
+                // var_dump($folio_Sale);
+                // var_dump($method);
+                // var_dump($subtotal);
+                // var_dump($total);
+                // var_dump($pago_cliente);
+                // var_dump($fecha);
+                require 'fpdf183/fpdf.php'; 
+                $pdf = new FPDF('P','mm', array(200,150));
+                $pdf->AddPage();
+                
+                // // CABECERA
+                $pdf->SetFont('Arial','',19);
+                $pdf->Cell(0,4,'EUNICODIN',0,1,'C');
+                $pdf->Ln(4);
+                $pdf->Cell(0,0,'','T');
+                $pdf->Ln(8);
+                $pdf->SetFont('Arial','',12);
+                $pdf->Cell(0,4,'AHALI EUNICE SILVA RUBIO',0,1,'C');
+                $pdf->Ln(2);
+                $pdf->Cell(0,4,'TEL: 8711175905',0,1,'C');
+                $pdf->Ln(2);
+                $pdf->Cell(0,4,'No. CUENTA BANORTE: 4915669475841902',0,1,'C');
+                $pdf->Ln(2);
+                $pdf->Cell(0,4,'No. CUENTA BBVA: 4152313658738393',0,1,'C');
+                $pdf->Ln(2);
+                $pdf->Cell(0,4,'ahrisu@hotmail.com',0,1,'C');
+                $pdf->Ln(10);
+                
+                // //DATO DE LA VENTA
+                $pdf->SetFont('Arial','',11);
+                $pdf->Cell(32,4,"Folio de la venta: ",0,0,'');
+                $pdf->SetFont('Arial','B',11);
+                $pdf->Cell(20,4,$folio_Sale,0,1,'');
+                $pdf->Ln(2);
+                $pdf->SetFont('Arial','',11);
+                $pdf->Cell(32,4,"Cliente: ",0,0,'');
+                $pdf->SetFont('Arial','B',11);
+                $pdf->Cell(20,4,$client,0,1,'');
+                $pdf->Ln(2);
+                $pdf->SetFont('Arial','',11);
+                $pdf->Cell(32,4,"Metodo de pago: ",0,0,'');
+                $pdf->SetFont('Arial','B',11);
+                $pdf->Cell(20,4,$method,0,1,'');
+                $pdf->Ln(10);
+
+                // // COLUMNAS
+                $pdf->SetFont('Arial', 'B', 9);
+                $pdf->Cell(60, 10, 'Producto', 0);
+                $pdf->Cell(5, 10, 'Unidades',0,0,'R');
+                $pdf->Cell(20, 10, 'Precio',0,0,'R');
+                $pdf->Cell(20, 10, 'Total',0,0,'R');
+                $pdf->Ln(8);
+                $pdf->Cell(0,0,'','T');
+                $pdf->Ln(0);
+
+                // // PRODUCTOS
+                $pdf->SetFont('Arial', '', 9);
+                foreach ($products_information as $value) {
+                    $pdf->Cell(60, 10,"".$value['name']."",0,0,'L');
+                    $pdf->Cell(5, 10, "".$value['quantity']."",0,0,'R');
+                    $pdf->Cell(20, 10, "$".$value['store_price']."",0,0,'R');
+                    $pdf->Cell(20, 10, "$".$value['Total']."",0,0,'R');
+                    $pdf->Ln(8);
+                }
+
+                // // SUMATORIO DE LOS PRODUCTOS Y EL IVA 
+                $pdf->Cell(0,0,'','T'); 
+                $pdf->Ln(8); 
+                $pdf->Cell(0, 4,"Subtotal: $".$subtotal,0,1,'R'); 
+                // $pdf->Cell(20, 10, '', 0); 
+                // $pdf->Cell(15, 10, number_format(round((round(12.25,2)/1.21),2), 2, ',', ' ').'$',0,0,'R'); 
+                $pdf->Ln(3); 
+                $pdf->Cell(0, 4, "Total: $".$total,0,1, 'R'); 
+                // $pdf->Cell(20, 10, '', 0); 
+                // $pdf->Cell(15, 10, number_format(round((round(12.25,2)),2)-round((round(2*3,2)/1.21),2), 2, ',', ' ').'$',0,0,'R'); 
+                $pdf->Ln(3); 
+                $pdf->Cell(0, 4, "Pago del cliente: $".$pago_cliente, 0, 1, 'R'); 
+                // $pdf->Cell(20, 10, '', 0); 
+                // $pdf->Ln(3); 
+                // $pdf->Cell(0,4, "Cambio: $".($total - $pago_cliente), 0,1,'R'); 
+                // $pdf->Cell(20, 10, '', 0); 
+                // $pdf->Cell(15, 10, number_format(round(12.25,2), 2, ',', ' ').'$',0,0,'R'); 
+                
+                // // PIE DE PAGINA $pdf->Ln(10); 
+                $pdf->Ln(20);
+                $pdf->Cell(0,0,'GRACIAS POR COMPRAR EN LA TIENDITA!',0,1,'C'); 
+                $pdf->Ln(3); 
+                $pdf->Output('ticket.pdf','i');
+            }
+        }
+    }
+    public function generatePDF(){
+        
+    }
 }
 
 class debtors {
@@ -1177,7 +1321,7 @@ class debtors {
         $folio_array = [];
         $sales_array = [];
         
-        $query_sales_debtors = $con->prepare("SELECT c.id, c.name, sum(s.total) as 'totalDeudaClient', d.restant_debt, d.abonos FROM sales s INNER JOIN clients c ON c.id = s.id_client RIGHT JOIN debtors d ON d.id_client = c.id where s.status = 'Pendiente' GROUP BY s.id_client");
+        $query_sales_debtors = $con->prepare("SELECT c.id, c.name, d.total_debt, d.restant_debt, d.abonos FROM sales s INNER JOIN clients c ON c.id = s.id_client RIGHT JOIN debtors d ON d.id_client = c.id where s.status = 'Pendiente' GROUP BY s.id_client");
         if($query_sales_debtors->execute()){
             $sales_debtors = $query_sales_debtors->fetchAll(PDO::FETCH_ASSOC);
             if (count($sales_debtors) > 0) {
@@ -1185,16 +1329,16 @@ class debtors {
                     $sales_array = [];
                     $statusDeuda = '';
 
-                    $query_sales_from_debtor = $con->prepare("SELECT id, folio, subtotal, total, fecha FROM sales WHERE id_client = ".$debtor['id']." AND status = 'Pendiente'");
+                    $query_sales_from_debtor = $con->prepare("SELECT id, folio, subtotal, total, pay_from_client, fecha FROM sales WHERE id_client = ".$debtor['id']." AND status = 'Pendiente'");
                     if($query_sales_from_debtor->execute()){
                         $sales_debtors_table = $query_sales_from_debtor->fetchAll(PDO::FETCH_ASSOC);
                         // Llenar array de ventas pertenecientes a los deudores
                         foreach ($sales_debtors_table as $debtors) {
-                            array_push($sales_array, [$debtors['id'], $debtors['folio'], $debtors['subtotal'], $debtors['total'], $debtors['fecha']]);
+                            array_push($sales_array, [$debtors['id'], $debtors['folio'], $debtors['subtotal'], $debtors['total'], $debtors['pay_from_client'], $debtors['fecha']]);
                         }
                     }
                 
-                    if ((float)$debtor['totalDeudaClient'] > 0) {
+                    if ((float)$debtor['total_debt'] > 0) {
                         $statusDeuda = 'Pendiente';
                     } else {
                         $statusDeuda = 'Pagada';
@@ -1202,7 +1346,7 @@ class debtors {
                     echo "<tr>";
                     echo "    <td>".($index + 1)."</td>";
                     echo "    <td>".$debtor['name']."</td>";
-                    echo "    <td>$".(float)$debtor['totalDeudaClient']."</td>";
+                    echo "    <td>$".(float)$debtor['total_debt']."</td>";
                     echo "    <td>$".(float)$debtor['restant_debt']."</td>";
                     echo "    <td>$".(float)$debtor['abonos']."</td>";
                     echo "    <td>".$statusDeuda."</td>";
@@ -1221,6 +1365,7 @@ class debtors {
                     echo "                        <th>Folio</th>";
                     echo "                        <th>Subtotal</th>";
                     echo "                        <th>Total</th>";
+                    echo "                        <th>Pagó con</th>";
                     echo "                        <th>Fecha</th>";
                     echo "                    </tr>";
                     echo "                </thead>";
@@ -1232,6 +1377,7 @@ class debtors {
                         echo "                    <td>".$value[2]."</td>";
                         echo "                    <td>".$value[3]."</td>";
                         echo "                    <td>".$value[4]."</td>";
+                        echo "                    <td>".$value[5]."</td>";
                         echo "                </tr>";
                     }
                     echo "                </tbody>";

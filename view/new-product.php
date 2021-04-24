@@ -13,7 +13,7 @@ require_once 'includes/header.php';
             <div class="box-content">
                 <div class="form-group">
                     <label for="inputImage">Seleccione una imagen</label>
-                    <div class="box-image" onclick="selectImage()" style="background-image:url(<?=isset($product[0]['image']) && !empty($product[0]['image']) ? 'images/'.$product[0]['image'] : 'https://images.unsplash.com/photo-1567039430063-2459256c6f05?ixid=MXwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHw%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=1267&q=80';?>)"></div>
+                    <div class="box-image" onclick="selectImage()" style="background-image:url(<?=isset($product[0]['image']) && !empty($product[0]['image']) ? 'images/'.$product[0]['image'] : 'https://images.unsplash.com/photo-1454789548928-9efd52dc4031?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1000&q=80';?>)"></div>
                     <input type="file" name="image" id="file" class="form-control-file">
                     <div class="alert alert-danger" id="failDataImage" role="alert"></div>
                 </div>

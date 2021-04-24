@@ -21,7 +21,7 @@
                 <?php if($product['status'] == 'empty' || $product['status'] == 'warning'): ?>
                     <span style="background-color:<?= $product['status'] == 'empty' ? '#ec4646' : '#ffe268';?>;color:<?= $product['status'] == 'empty' ? 'white' : '';?>" class="status_info"><?= $product['status'] == 'empty' ? 'Agotado' : 'Por agotarse';?></span>
                 <?php endif; ?>
-                <img src=<?= $product['image'] == '' ? "https://images.unsplash.com/photo-1567039430063-2459256c6f05?ixid=MXwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHw%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=1267&q=80" : "images/".$product['image']; ?> class="card-img-top" alt="Eunicodin">
+                <img src=<?= $product['image'] == '' ? "https://images.unsplash.com/photo-1454789548928-9efd52dc4031?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1000&q=80" : "images/".$product['image']; ?> class="card-img-top" alt="Eunicodin">
                 <div class="card-body">
                     <div class="info_price_name">
                         <h5 class="card-title"><?=$product['name']?></h5>
@@ -88,7 +88,7 @@
                         <?php foreach ($productos as $index => $product): ?>
                             <tr>
                                 <td><?= $index + 1?></td>
-                                <td><img height="50px" src=<?= $product['image'] == '' ? "https://images.unsplash.com/photo-1567039430063-2459256c6f05?ixid=MXwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHw%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=1267&q=80" : "images/".$product['image']; ?> class="card-img-top" alt="Eunicodin"></td>
+                                <td><img height="50px" src=<?= $product['image'] == '' ? "https://images.unsplash.com/photo-1454789548928-9efd52dc4031?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1000&q=80" : "images/".$product['image']; ?> class="card-img-top" alt="Eunicodin"></td>
                                 <td><?=$product['name']?></td>
                                 <td>$ <?=$product['store_price']?></td>
                                 <td>$ <?=$product['price']?></td>
