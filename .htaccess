@@ -1,0 +1,23 @@
+<IfModule mod_rewrite.c>
+
+# /-----------------CODIGO PARA TENER URL AMIGABLES-----------------/
+
+# Activar mod_rewrite
+RewriteEngine on
+
+#cuando no existe una pagina
+ErrorDocument 404 http://localhost/Master-PHP/proyecto-php-poo/error/
+
+#que no muestre nada que sea un directorio
+RewriteCond %{SCRIPT_FILENAME} !-d 
+
+#que no muestre nada que sea un archivo
+RewriteCond %{SCRIPT_FILENAME} !-f
+
+#Regla de escritura
+#pertenecen:↓ $1   $2
+RewriteRule ^(.*)/(.*) index.php?page=$1&action=$2
+
+# /----------------- FIN CODIGO PARA TENER URL AMIGABLES-----------------/
+
+</IfModule>
